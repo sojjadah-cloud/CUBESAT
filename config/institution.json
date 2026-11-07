@@ -1,35 +1,19 @@
 {
-  "_comment": "EXAMPLE VALUES — replace with the college's official academic levels, departments and pathways before launch. Each entry needs a stable id plus Arabic and English labels. An 'Other' option is added automatically to departments and specialisations.",
+  "_comment": "Academic levels, departments and weekly-hour options shown in the application form. Each entry needs a stable id plus Arabic and English labels. Specialisation is typed by the student.",
   "academicLevels": [
-    { "id": "foundation", "en": "Foundation", "ar": "البرنامج التأسيسي" },
-    { "id": "year1", "en": "Year 1", "ar": "السنة الأولى" },
-    { "id": "year2", "en": "Year 2", "ar": "السنة الثانية" },
-    { "id": "year3", "en": "Year 3", "ar": "السنة الثالثة" },
-    { "id": "year4", "en": "Year 4", "ar": "السنة الرابعة" },
-    { "id": "postgraduate", "en": "Postgraduate", "ar": "الدراسات العليا" }
+    { "id": "foundation", "en": "Foundation", "ar": "المستوى التأسيسي" },
+    { "id": "level3", "en": "Level 3", "ar": "المستوى الثالث" },
+    { "id": "level4", "en": "Level 4", "ar": "المستوى الرابع" },
+    { "id": "level5", "en": "Level 5", "ar": "المستوى الخامس" },
+    { "id": "level6", "en": "Level 6", "ar": "المستوى السادس" }
   ],
   "departments": [
-    {
-      "id": "engineering",
-      "en": "Engineering",
-      "ar": "الهندسة",
-      "specialisations": [
-        { "id": "mechanical", "en": "Mechanical Engineering", "ar": "الهندسة الميكانيكية" },
-        { "id": "electrical", "en": "Electrical & Electronic Engineering", "ar": "الهندسة الكهربائية والإلكترونية" },
-        { "id": "aeronautical", "en": "Aeronautical Engineering", "ar": "هندسة الطيران" },
-        { "id": "mechatronics", "en": "Mechatronics", "ar": "الميكاترونكس" }
-      ]
-    },
-    {
-      "id": "computing",
-      "en": "Computing & Information Sciences",
-      "ar": "الحوسبة وعلوم المعلومات",
-      "specialisations": [
-        { "id": "computer_science", "en": "Computer Science", "ar": "علوم الحاسوب" },
-        { "id": "cyber_security", "en": "Cyber Security", "ar": "الأمن السيبراني" },
-        { "id": "computer_engineering", "en": "Computer Engineering", "ar": "هندسة الحاسوب" }
-      ]
-    }
+    { "id": "foundation", "en": "Foundation Studies", "ar": "الدراسات التأسيسية" },
+    { "id": "systems", "en": "Systems Engineering", "ar": "هندسة النظم" },
+    { "id": "aeronautical", "en": "Aeronautical Engineering", "ar": "هندسة الطيران" },
+    { "id": "marine", "en": "Marine Engineering", "ar": "الهندسة البحرية" },
+    { "id": "civil", "en": "Civil Engineering", "ar": "الهندسة المدنية" },
+    { "id": "geomatics", "en": "Geomatics Engineering", "ar": "هندسة الجيوماتكس" }
   ],
   "weeklyHours": [
     { "id": "1-3", "en": "1–3 hours", "ar": "1–3 ساعات" },

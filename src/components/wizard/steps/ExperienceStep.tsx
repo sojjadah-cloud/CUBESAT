@@ -4,12 +4,14 @@ import { AlertCircle, BookOpen, FlaskConical, GraduationCap, Plus, Sparkles, Tra
 import { useLocale } from "@/components/LocaleProvider";
 import { ChoiceGroup, SelectField, StepHeading, TextAreaField, TextField } from "@/components/ui/fields";
 import { useWizard } from "@/components/wizard/context";
+import { MotivationSection, SkillsSection } from "@/components/wizard/steps/SkillsSections";
 import { EXPERIENCE_KEYS, MAX_ENTRIES, newEntry, type ExperienceKey } from "@/lib/application";
 import type { Dictionary } from "@/lib/i18n";
 
 type Spec = {
   key: string;
   label: (f: Dictionary["experience"]["fields"]) => string;
+  ph?: (p: Dictionary["experience"]["ph"]) => string;
   kind?: "text" | "year" | "textarea" | "url" | "certificate" | "scope" | "mode";
   optional?: boolean;
   wide?: boolean;
@@ -17,35 +19,35 @@ type Spec = {
 
 const SPECS: Record<ExperienceKey, Spec[]> = {
   workshops: [
-    { key: "title", label: (f) => f.title, wide: true },
-    { key: "organiser", label: (f) => f.organiser },
-    { key: "year", label: (f) => f.year, kind: "year" },
-    { key: "topics", label: (f) => f.topics, optional: true },
-    { key: "skills", label: (f) => f.skills, optional: true },
+    { key: "title", label: (f) => f.title, ph: (p) => p.title, wide: true },
+    { key: "organiser", label: (f) => f.organiser, ph: (p) => p.organiser },
+    { key: "year", label: (f) => f.year, ph: (p) => p.year, kind: "year" },
+    { key: "topics", label: (f) => f.topics, ph: (p) => p.topics, optional: true },
+    { key: "skills", label: (f) => f.skills, ph: (p) => p.skills, optional: true },
   ],
   courses: [
-    { key: "name", label: (f) => f.courseName, wide: true },
-    { key: "provider", label: (f) => f.provider },
-    { key: "year", label: (f) => f.year, kind: "year" },
-    { key: "skills", label: (f) => f.mainSkills, optional: true },
+    { key: "name", label: (f) => f.courseName, ph: (p) => p.courseName, wide: true },
+    { key: "provider", label: (f) => f.provider, ph: (p) => p.provider },
+    { key: "year", label: (f) => f.year, ph: (p) => p.year, kind: "year" },
+    { key: "skills", label: (f) => f.mainSkills, ph: (p) => p.mainSkills, optional: true },
     { key: "certificate", label: (f) => f.certificate, kind: "certificate", optional: true },
   ],
   competitions: [
-    { key: "name", label: (f) => f.competitionName, wide: true },
-    { key: "organiser", label: (f) => f.competitionOrganiser },
-    { key: "year", label: (f) => f.year, kind: "year" },
+    { key: "name", label: (f) => f.competitionName, ph: (p) => p.competitionName, wide: true },
+    { key: "organiser", label: (f) => f.competitionOrganiser, ph: (p) => p.competitionOrganiser },
+    { key: "year", label: (f) => f.year, ph: (p) => p.year, kind: "year" },
     { key: "scope", label: (f) => f.scope, kind: "scope", optional: true },
     { key: "mode", label: (f) => f.mode, kind: "mode", optional: true },
-    { key: "result", label: (f) => f.result, optional: true },
-    { key: "role", label: (f) => f.role, optional: true },
+    { key: "result", label: (f) => f.result, ph: (p) => p.result, optional: true },
+    { key: "role", label: (f) => f.role, ph: (p) => p.role, optional: true },
   ],
   projects: [
-    { key: "name", label: (f) => f.projectName, wide: true },
-    { key: "description", label: (f) => f.description, kind: "textarea", wide: true },
-    { key: "technologies", label: (f) => f.technologies, optional: true },
-    { key: "role", label: (f) => f.projectRole },
-    { key: "outcome", label: (f) => f.outcome, optional: true },
-    { key: "url", label: (f) => f.url, kind: "url", optional: true },
+    { key: "name", label: (f) => f.projectName, ph: (p) => p.projectName, wide: true },
+    { key: "description", label: (f) => f.description, ph: (p) => p.description, kind: "textarea", wide: true },
+    { key: "technologies", label: (f) => f.technologies, ph: (p) => p.technologies, optional: true },
+    { key: "role", label: (f) => f.projectRole, ph: (p) => p.projectRole },
+    { key: "outcome", label: (f) => f.outcome, ph: (p) => p.outcome, optional: true },
+    { key: "url", label: (f) => f.url, ph: (p) => p.url, kind: "url", optional: true },
   ],
 };
 
@@ -59,7 +61,7 @@ const ICONS: Record<ExperienceKey, typeof BookOpen> = {
 const uid = () => (typeof crypto !== "undefined" && "randomUUID" in crypto ? crypto.randomUUID() : String(Math.random()).slice(2));
 
 function Group({ group }: { group: ExperienceKey }) {
-  const { t } = useLocale();
+  const { t, locale } = useLocale();
   const { data, update, err, touch } = useWizard();
   const g = data.experience[group];
   const copy = t.experience.groups[group];
@@ -133,17 +135,18 @@ function Group({ group }: { group: ExperienceKey }) {
                     error: err(name),
                     className: spec.wide ? "sm:col-span-2" : "",
                   };
+                  const ph = spec.ph?.(t.experience.ph);
                   const onChange = (v: string) => setField(i, spec.key, v);
                   const onBlur = () => touch(name);
                   switch (spec.kind) {
                     case "textarea":
-                      return <TextAreaField key={spec.key} {...common} value={value} onChange={onChange} onBlur={onBlur} maxLength={1000} rows={3} />;
+                      return <TextAreaField key={spec.key} {...common} value={value} onChange={onChange} onBlur={onBlur} maxLength={1000} rows={3} placeholder={ph} />;
                     case "year":
                       return (
-                        <TextField key={spec.key} {...common} value={value} onChange={(v) => onChange(v.replace(/\D/g, "").slice(0, 4))} onBlur={onBlur} inputMode="numeric" ltr maxLength={4} placeholder="2024" />
+                        <TextField key={spec.key} {...common} value={value} onChange={(v) => onChange(v.replace(/\D/g, "").slice(0, 4))} onBlur={onBlur} inputMode="numeric" ltr maxLength={4} placeholder={ph} />
                       );
                     case "url":
-                      return <TextField key={spec.key} {...common} value={value} onChange={onChange} onBlur={onBlur} type="url" inputMode="url" ltr placeholder={f.urlHint} maxLength={300} />;
+                      return <TextField key={spec.key} {...common} value={value} onChange={onChange} onBlur={onBlur} type="url" inputMode="url" ltr={locale === "en"} placeholder={ph} maxLength={300} />;
                     case "certificate":
                       return (
                         <SelectField key={spec.key} {...common} value={value} onChange={onChange} options={[{ value: "yes", label: t.common.yes }, { value: "no", label: t.common.no }]} />
@@ -163,7 +166,7 @@ function Group({ group }: { group: ExperienceKey }) {
                         <SelectField key={spec.key} {...common} value={value} onChange={onChange} options={[{ value: "team", label: f.team }, { value: "individual", label: f.individual }]} />
                       );
                     default:
-                      return <TextField key={spec.key} {...common} value={value} onChange={onChange} onBlur={onBlur} maxLength={spec.optional ? 500 : 200} />;
+                      return <TextField key={spec.key} {...common} value={value} onChange={onChange} onBlur={onBlur} maxLength={spec.optional ? 500 : 200} placeholder={ph} />;
                   }
                 })}
               </div>
@@ -194,14 +197,21 @@ export function ExperienceStep() {
   return (
     <div>
       <StepHeading title={t.experience.title} />
-      <p className="mb-6 flex items-start gap-3 rounded-[12px] border border-signal/30 bg-signal/[0.07] px-4 py-3 text-[14px] text-ink">
-        <Sparkles className="mt-[3px] h-4 w-4 shrink-0 text-signal" aria-hidden="true" />
-        {t.experience.beginners}
-      </p>
       <div className="space-y-5">
-        {EXPERIENCE_KEYS.map((k) => (
-          <Group key={k} group={k} />
-        ))}
+        <SkillsSection />
+        <section aria-labelledby="exp-h" className="space-y-5 pt-2">
+          <h2 id="exp-h" className="text-center text-[20px] font-bold lg:text-start">
+            {t.experience.sectionTitle}
+          </h2>
+          <p className="flex items-start gap-3 rounded-[12px] border border-line bg-white px-4 py-3 text-[14px] text-ink-muted">
+            <Sparkles className="mt-[3px] h-4 w-4 shrink-0 text-orbit-ink" aria-hidden="true" />
+            {t.experience.beginners}
+          </p>
+          {EXPERIENCE_KEYS.map((k) => (
+            <Group key={k} group={k} />
+          ))}
+        </section>
+        <MotivationSection />
       </div>
     </div>
   );

@@ -3,7 +3,7 @@
 The bilingual (Arabic RTL / English LTR) recruitment portal for the MTC CubeSat Society at the Military Technological College, Sultanate of Oman. It has three parts:
 
 - **Public site**: three pages that only go forward: home (`/`) → about (`/about`) → teams (`/teams`) → application. There is no menu or side pages. The name "MTC CubeSat Society" is kept in English in both languages; everything else follows the selected language.
-- **Application wizard** (`/apply`): seven steps: team area → one team → student details → experience → skills & motivation → attachments → review & submit.
+- **Application wizard** (`/apply`): six steps: team area → team → basic information → skills & experience (skills, previous participation, motivation) → attachments → review & submit. Applicants are identified by student ID; no email is collected.
 - **Team portal** (`/admin`, not linked from the public pages): dashboard, search and filters, applicant profiles, status workflow, internal notes, private document viewing, CSV export and an audit log.
 
 ## Stack
@@ -47,15 +47,12 @@ With no `DATABASE_URL`, data is stored in `.data/pglite`. Only one process at a 
 npm run build && npm start
 ```
 
-## Institutional configuration — must be set before launch
-
-I have **not** guessed any of the college's official formats. You need to set these:
+## Institutional configuration
 
 | What | Where |
 | --- | --- |
-| Academic levels, departments, specialisations, weekly-hour options | `config/institution.json` (current values are **examples**) |
+| Academic levels, departments, weekly-hour options | `config/institution.json` (specialisation is typed by the student) |
 | Student ID format | `STUDENT_ID_PATTERN` (regex) + `STUDENT_ID_HINT_EN` / `STUDENT_ID_HINT_AR`. Default: 3–20 letters, digits or hyphens |
-| College email domain(s) | `ALLOWED_EMAIL_DOMAINS` (comma-separated). Default: any valid email |
 | Upload limits | `MAX_IMAGE_MB`, `MAX_CV_MB`, `MAX_IMAGES` |
 
 Team content (names, descriptions, responsibilities, skills) is in `src/lib/teams.ts`. All interface text is in `src/lib/i18n/ar.ts` and `src/lib/i18n/en.ts`. The Arabic dictionary is type-checked against the English one, so a missing key fails the build.

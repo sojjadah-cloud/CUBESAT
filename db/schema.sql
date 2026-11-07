@@ -49,7 +49,7 @@ CREATE TABLE IF NOT EXISTS applications (
   specialisation        TEXT NOT NULL,
   specialisation_other  TEXT,
   phone                 TEXT NOT NULL,
-  email                 TEXT NOT NULL,
+  email                 TEXT,
   experience            JSONB NOT NULL,
   skills                JSONB NOT NULL DEFAULT '[]'::jsonb,
   skills_other          TEXT,
@@ -62,6 +62,8 @@ CREATE TABLE IF NOT EXISTS applications (
   created_at            TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at            TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+-- Email is no longer collected (the student ID identifies applicants).
+ALTER TABLE applications ALTER COLUMN email DROP NOT NULL;
 CREATE INDEX IF NOT EXISTS applications_status_idx ON applications (status);
 CREATE INDEX IF NOT EXISTS applications_primary_team_idx ON applications (primary_team);
 CREATE INDEX IF NOT EXISTS applications_created_idx ON applications (created_at DESC);

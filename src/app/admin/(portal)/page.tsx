@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { getStats } from "@/lib/admin-data";
 import { getServerDictionary } from "@/lib/server-locale";
-import { ACADEMIC_LEVELS, optionLabel, specialisationLabel } from "@/lib/institution";
+import { ACADEMIC_LEVELS, optionLabel } from "@/lib/institution";
 import { teamName } from "@/lib/teams";
 import { Bars } from "@/components/admin/Bars";
 import type { Status } from "@/lib/application";
@@ -49,7 +49,7 @@ export default async function OverviewPage() {
           <Bars
             title={a.bySpecialisation}
             empty={a.emptyAll}
-            items={s.bySpec.map((x) => ({ label: specialisationLabel(x.dept, x.key, x.other, locale), value: x.n }))}
+            items={s.bySpec.map((x) => ({ label: x.key, value: x.n }))}
           />
         </div>
       </div>

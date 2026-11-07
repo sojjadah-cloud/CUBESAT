@@ -5,27 +5,22 @@ export interface Option {
   en: string;
   ar: string;
 }
-export interface Department extends Option {
-  specialisations: Option[];
-}
-
+/** Value stored by older applications that typed their own department. */
 export const OTHER = "other";
 
 export const ACADEMIC_LEVELS: Option[] = data.academicLevels;
-export const DEPARTMENTS: Department[] = data.departments;
+export const DEPARTMENTS: Option[] = data.departments;
 export const WEEKLY_HOURS: Option[] = data.weeklyHours;
 
 /**
  * Institutional validation rules. These come from environment variables so
  * the organising team can set the real formats without code changes.
- * Nothing here assumes a particular student-ID format or email domain.
+ * Nothing here assumes a particular student-ID format.
  */
 export interface InstitutionRules {
   /** Regex source for student IDs, or null to accept 3–20 letters/digits. */
   studentIdPattern: string | null;
   studentIdHint: { en: string; ar: string } | null;
-  /** Allowed college email domains (lowercase), or empty to accept any valid email. */
-  emailDomains: string[];
 }
 
 export function getInstitutionRules(): InstitutionRules {
@@ -42,10 +37,6 @@ export function getInstitutionRules(): InstitutionRules {
   return {
     studentIdPattern: pattern,
     studentIdHint: hintEn || hintAr ? { en: hintEn || hintAr || "", ar: hintAr || hintEn || "" } : null,
-    emailDomains: (process.env.ALLOWED_EMAIL_DOMAINS ?? "")
-      .split(",")
-      .map((d) => d.trim().toLowerCase().replace(/^@/, ""))
-      .filter(Boolean),
   };
 }
 
@@ -55,15 +46,4 @@ export const optionLabel = (list: Option[], id: string | null | undefined, local
 export function departmentLabel(id: string, other: string | null | undefined, locale: "ar" | "en") {
   if (id === OTHER) return other || (locale === "ar" ? "أخرى" : "Other");
   return optionLabel(DEPARTMENTS, id, locale);
-}
-
-export function specialisationLabel(
-  deptId: string,
-  id: string,
-  other: string | null | undefined,
-  locale: "ar" | "en",
-) {
-  if (id === OTHER) return other || (locale === "ar" ? "أخرى" : "Other");
-  const dept = DEPARTMENTS.find((d) => d.id === deptId);
-  return optionLabel(dept?.specialisations ?? [], id, locale);
 }

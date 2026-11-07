@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { useLocale } from "@/components/LocaleProvider";
-import { CubeSatIllustration } from "@/components/Brand";
+import { OrbitGlobe } from "@/components/OrbitGlobe";
 import { SiteShell } from "@/components/site/SiteShell";
 
 export function Landing() {
@@ -26,7 +26,7 @@ export function Landing() {
           </div>
 
           <div className="mx-auto w-full max-w-[480px] rounded-[18px] border border-[#1B3156] bg-[#0B1B33] p-3 shadow-[0_24px_48px_-24px_rgba(11,27,51,0.45)] sm:p-5">
-            <CubeSatIllustration className="h-auto w-full" labels={t.landing.illustration} />
+            <OrbitGlobe className="h-auto w-full" title={t.landing.illustration.title} />
           </div>
         </div>
       </section>

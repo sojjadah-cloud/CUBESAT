@@ -17,7 +17,7 @@ export interface ApplicationRow {
   specialisation: string;
   specialisation_other: string | null;
   phone: string;
-  email: string;
+  email: string | null;
   experience: Experience;
   skills: string[];
   skills_other: string | null;
@@ -111,11 +111,11 @@ export async function getStats() {
     ),
     count("primary_team"),
     count("academic_level"),
-    query<{ key: string; dept: string; other: string | null; n: number }>(
-      `SELECT specialisation AS key, department AS dept,
-              CASE WHEN specialisation = 'other' THEN lower(specialisation_other) END AS other,
-              count(*)::int AS n
-         FROM applications GROUP BY 1, 2, 3 ORDER BY 4 DESC LIMIT 12`,
+    query<{ key: string; n: number }>(
+      `SELECT min(trim(coalesce(specialisation_other, specialisation))) AS key, count(*)::int AS n
+         FROM applications
+        GROUP BY lower(trim(coalesce(specialisation_other, specialisation)))
+        ORDER BY 2 DESC LIMIT 12`,
     ),
     count("status"),
     count("category"),
@@ -131,11 +131,8 @@ export function rowToData(r: ApplicationRow): ApplicationData {
     studentId: r.student_id,
     academicLevel: r.academic_level,
     department: r.department,
-    departmentOther: r.department_other ?? "",
-    specialisation: r.specialisation,
-    specialisationOther: r.specialisation_other ?? "",
+    specialisation: r.specialisation_other ?? r.specialisation,
     phone: r.phone,
-    email: r.email,
     experience: r.experience,
     skills: r.skills ?? [],
     skillsOther: r.skills_other ?? "",

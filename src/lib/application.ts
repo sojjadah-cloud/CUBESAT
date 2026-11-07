@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { TEAMS, SKILL_IDS, type Category } from "@/lib/teams";
-import { ACADEMIC_LEVELS, DEPARTMENTS, WEEKLY_HOURS, OTHER, type InstitutionRules } from "@/lib/institution";
+import { ACADEMIC_LEVELS, DEPARTMENTS, WEEKLY_HOURS, type InstitutionRules } from "@/lib/institution";
 
 /* ────────────────────────── Data shape ────────────────────────── */
 
@@ -33,11 +33,9 @@ export interface ApplicationData {
   studentId: string;
   academicLevel: string;
   department: string;
-  departmentOther: string;
+  /** Typed by the student. */
   specialisation: string;
-  specialisationOther: string;
   phone: string;
-  email: string;
   experience: Experience;
   skills: string[];
   skillsOther: string;
@@ -55,11 +53,8 @@ export const emptyApplication = (): ApplicationData => ({
   studentId: "",
   academicLevel: "",
   department: "",
-  departmentOther: "",
   specialisation: "",
-  specialisationOther: "",
   phone: "",
-  email: "",
   experience: {
     workshops: { has: null, entries: [] },
     courses: { has: null, entries: [] },
@@ -187,28 +182,9 @@ export function buildSchemas(rules: InstitutionRules) {
       fullName: req(120).refine((v) => v.length >= 3, "tooShort"),
       studentId: req(40).refine((v) => studentIdRe.test(v.trim()), "studentId"),
       academicLevel: z.string().refine((v) => ACADEMIC_LEVELS.some((l) => l.id === v), "choose"),
-      department: z.string().refine((v) => v === OTHER || DEPARTMENTS.some((d) => d.id === v), "choose"),
-      departmentOther: opt(120),
-      specialisation: z.string().min(1, "choose"),
-      specialisationOther: opt(120),
+      department: z.string().refine((v) => DEPARTMENTS.some((d) => d.id === v), "choose"),
+      specialisation: req(120),
       phone: req(30).refine(isValidPhone, "phone"),
-      email: req(160)
-        .email("email")
-        .refine((v) => {
-          if (rules.emailDomains.length === 0) return true;
-          const domain = v.trim().toLowerCase().split("@")[1] ?? "";
-          return rules.emailDomains.includes(domain);
-        }, "emailDomain"),
-    })
-    .superRefine((d, ctx) => {
-      if (d.department === OTHER && !d.departmentOther.trim())
-        ctx.addIssue({ code: "custom", path: ["departmentOther"], message: "required" });
-      const dept = DEPARTMENTS.find((x) => x.id === d.department);
-      const validSpec =
-        d.specialisation === OTHER || (dept?.specialisations.some((s) => s.id === d.specialisation) ?? false);
-      if (d.specialisation && !validSpec) ctx.addIssue({ code: "custom", path: ["specialisation"], message: "choose" });
-      if (d.specialisation === OTHER && !d.specialisationOther.trim())
-        ctx.addIssue({ code: "custom", path: ["specialisationOther"], message: "required" });
     });
 
   const experience = z.object({
@@ -234,8 +210,9 @@ export function buildSchemas(rules: InstitutionRules) {
   return { category, teams, student, experience, motivation, review };
 }
 
-export type StepId = "category" | "teams" | "student" | "experience" | "motivation" | "attachments" | "review";
-export const STEPS: StepId[] = ["category", "teams", "student", "experience", "motivation", "attachments", "review"];
+/** "student" = basic information; "experience" = skills, experience and motivation. */
+export type StepId = "category" | "teams" | "student" | "experience" | "attachments" | "review";
+export const STEPS: StepId[] = ["category", "teams", "student", "experience", "attachments", "review"];
 
 function collect(result: z.SafeParseReturnType<unknown, unknown>): FieldErrors {
   if (result.success) return {};
@@ -253,8 +230,12 @@ export function validateStep(step: StepId, data: ApplicationData, rules: Institu
     case "category": return collect(s.category.safeParse(data));
     case "teams": return collect(s.teams.safeParse(data));
     case "student": return collect(s.student.safeParse(data));
-    case "experience": return collect(s.experience.safeParse(data));
-    case "motivation": return collect(s.motivation.safeParse(data));
+    case "experience": {
+      // Skills, experience and motivation share one step; report all their errors together.
+      const a = collect(s.motivation.safeParse(data));
+      const b = collect(s.experience.safeParse(data));
+      return { ...b, ...a };
+    }
     case "attachments": return {};
     case "review": return collect(s.review.safeParse(data));
   }
@@ -272,7 +253,7 @@ export function validateApplication(input: unknown, rules: InstitutionRules) {
   const result = full.safeParse(input);
   if (result.success) return { ok: true as const, data: result.data };
   const errors = collect(result);
-  const order: StepId[] = ["category", "teams", "student", "experience", "motivation", "review"];
+  const order: StepId[] = ["category", "teams", "student", "experience", "review"];
   const raw = (input ?? {}) as ApplicationData;
   const step = order.find((st) => Object.keys(validateStep(st, raw, rules)).length > 0) ?? "review";
   return { ok: false as const, errors, step };

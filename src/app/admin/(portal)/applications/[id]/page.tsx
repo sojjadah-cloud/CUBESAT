@@ -1,13 +1,13 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { headers } from "next/headers";
-import { ArrowLeft, ArrowRight, FileText, Mail, Phone } from "lucide-react";
+import { ArrowLeft, ArrowRight, FileText, Phone } from "lucide-react";
 import { requireAdminPage } from "@/lib/auth";
 import { audit } from "@/lib/audit";
 import { query } from "@/lib/db";
 import { getApplication, rowToData } from "@/lib/admin-data";
 import { getServerDictionary } from "@/lib/server-locale";
-import { ACADEMIC_LEVELS, departmentLabel, optionLabel, specialisationLabel } from "@/lib/institution";
+import { ACADEMIC_LEVELS, departmentLabel, optionLabel } from "@/lib/institution";
 import { EXPERIENCE_KEYS } from "@/lib/application";
 import { ApplicationSummary } from "@/components/ApplicationSummary";
 import { StatusBadge } from "@/components/admin/StatusBadge";
@@ -56,7 +56,7 @@ export default async function ApplicationPage({ params }: { params: Promise<{ id
             <span dir="ltr" className="font-display">{app.reference}</span> · {a.submitted} {fmt.format(new Date(app.created_at))}
           </p>
           <div className="mt-3 flex flex-wrap gap-x-5 gap-y-1 text-[14px] text-ink-muted">
-            <a href={`mailto:${app.email}`} className="inline-flex items-center gap-1.5 hover:text-ink"><Mail className="h-4 w-4" aria-hidden="true" /><span dir="ltr">{app.email}</span></a>
+            
             <a href={`tel:${app.phone.replace(/[^\d+]/g, "")}`} className="inline-flex items-center gap-1.5 hover:text-ink"><Phone className="h-4 w-4" aria-hidden="true" /><span dir="ltr">{app.phone}</span></a>
           </div>
         </div>
@@ -71,7 +71,7 @@ export default async function ApplicationPage({ params }: { params: Promise<{ id
               <div><dt className="text-[12px] text-ink-muted">{t.student.studentId}</dt><dd dir="ltr" className="ltr">{app.student_id}</dd></div>
               <div><dt className="text-[12px] text-ink-muted">{t.student.academicLevel}</dt><dd>{optionLabel(ACADEMIC_LEVELS, app.academic_level, locale)}</dd></div>
               <div><dt className="text-[12px] text-ink-muted">{t.student.department}</dt><dd>{departmentLabel(app.department, app.department_other, locale)}</dd></div>
-              <div className="sm:col-span-3"><dt className="text-[12px] text-ink-muted">{t.student.specialisation}</dt><dd>{specialisationLabel(app.department, app.specialisation, app.specialisation_other, locale)}</dd></div>
+              <div className="sm:col-span-3"><dt className="text-[12px] text-ink-muted">{t.student.specialisation}</dt><dd>{app.specialisation_other ?? app.specialisation}</dd></div>
             </dl>
             <div className="mt-5 border-t border-line/70 pt-4">
               <h3 className="text-[13px] font-semibold text-ink-muted">{a.experienceSummary}</h3>

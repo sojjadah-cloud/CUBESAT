@@ -2,7 +2,7 @@ import { Pencil } from "lucide-react";
 import type { ApplicationData, ExperienceKey, StepId } from "@/lib/application";
 import { EXPERIENCE_KEYS } from "@/lib/application";
 import type { Dictionary, Locale } from "@/lib/i18n";
-import { ACADEMIC_LEVELS, WEEKLY_HOURS, departmentLabel, optionLabel, specialisationLabel } from "@/lib/institution";
+import { ACADEMIC_LEVELS, WEEKLY_HOURS, departmentLabel, optionLabel } from "@/lib/institution";
 import { skillById, teamName } from "@/lib/teams";
 
 export interface SummaryFile {
@@ -124,16 +124,30 @@ export function ApplicationSummary({
               [t.student.fullName, data.fullName],
               [t.student.studentId, <Ltr key="id">{data.studentId}</Ltr>],
               [t.student.academicLevel, optionLabel(ACADEMIC_LEVELS, data.academicLevel, locale)],
-              [t.student.department, departmentLabel(data.department, data.departmentOther, locale)],
-              [t.student.specialisation, specialisationLabel(data.department, data.specialisation, data.specialisationOther, locale)],
+              [t.student.department, departmentLabel(data.department, null, locale)],
+              [t.student.specialisation, data.specialisation],
               [t.student.phone, <Ltr key="ph">{data.phone}</Ltr>],
-              [t.student.email, <Ltr key="em">{data.email}</Ltr>],
             ]}
           />
         </Section>
       )}
 
       <Section title={r.experience} step="experience" onEdit={onEdit} editLabel={t.common.edit}>
+        <div className="mb-6 border-b border-line/70 pb-5">
+          <h3 className="mb-2 text-[14px] font-semibold text-ink">{r.skills}</h3>
+          {data.skills.length ? (
+            <ul className="flex flex-wrap gap-1.5">
+              {data.skills.map((id) => (
+                <li key={id} className="rounded-md border border-line px-2.5 py-1 text-[13px] text-ink-muted" dir="auto">
+                  {skillById(id)?.label[locale] ?? id}
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-[13px] text-ink-faint">{r.none}</p>
+          )}
+          {data.skillsOther?.trim() && <p className="mt-2 text-[13px] text-ink-muted" dir="auto">{t.motivation.skillsOther}: {data.skillsOther}</p>}
+        </div>
         <div className="space-y-5">
           {EXPERIENCE_KEYS.map((key) => {
             const g = data.experience[key];
@@ -170,31 +184,17 @@ export function ApplicationSummary({
             );
           })}
         </div>
-      </Section>
-
-      <Section title={`${r.skills} · ${r.motivation}`} step="motivation" onEdit={onEdit} editLabel={t.common.edit}>
-        <div className="mb-5">
-          {data.skills.length ? (
-            <ul className="flex flex-wrap gap-1.5">
-              {data.skills.map((id) => (
-                <li key={id} className="rounded-md border border-line px-2.5 py-1 text-[13px] text-ink-muted" dir="auto">
-                  {skillById(id)?.label[locale] ?? id}
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p className="text-[13px] text-ink-faint">{r.none}</p>
-          )}
-          {data.skillsOther?.trim() && <p className="mt-2 text-[13px] text-ink-muted" dir="auto">{t.motivation.skillsOther}: {data.skillsOther}</p>}
+        <div className="mt-6 border-t border-line/70 pt-5">
+          <h3 className="mb-3 text-[14px] font-semibold text-ink">{r.motivation}</h3>
+          <Rows
+            rows={[
+              [t.motivation.why, <span key="w" className="whitespace-pre-line" dir="auto">{val(data.motivationWhy)}</span>],
+              [t.motivation.contribute, <span key="c" className="whitespace-pre-line" dir="auto">{val(data.motivationContribute)}</span>],
+              [t.motivation.learn, <span key="l" className="whitespace-pre-line" dir="auto">{val(data.motivationLearn)}</span>],
+              [t.motivation.hours, optionLabel(WEEKLY_HOURS, data.weeklyHours, locale) || none],
+            ]}
+          />
         </div>
-        <Rows
-          rows={[
-            [t.motivation.why, <span key="w" className="whitespace-pre-line" dir="auto">{val(data.motivationWhy)}</span>],
-            [t.motivation.contribute, <span key="c" className="whitespace-pre-line" dir="auto">{val(data.motivationContribute)}</span>],
-            [t.motivation.learn, <span key="l" className="whitespace-pre-line" dir="auto">{val(data.motivationLearn)}</span>],
-            [t.motivation.hours, optionLabel(WEEKLY_HOURS, data.weeklyHours, locale) || none],
-          ]}
-        />
       </Section>
 
       <Section title={r.attachments} step="attachments" onEdit={onEdit} editLabel={t.common.edit}>

@@ -2,12 +2,13 @@
 
 import { Check } from "lucide-react";
 import { useLocale } from "@/components/LocaleProvider";
-import { ChoiceGroup, StepHeading, TextAreaField, TextField } from "@/components/ui/fields";
+import { ChoiceGroup, TextAreaField, TextField } from "@/components/ui/fields";
 import { useWizard } from "@/components/wizard/context";
 import { SKILLS, teamById, type Skill } from "@/lib/teams";
 import { WEEKLY_HOURS } from "@/lib/institution";
 
-export function MotivationStep() {
+/** Skills section of the "Skills & experience" step. */
+export function SkillsSection() {
   const { t, locale } = useLocale();
   const { data, update, err, touch } = useWizard();
   const m = t.motivation;
@@ -36,9 +37,6 @@ export function MotivationStep() {
   );
 
   return (
-    <div>
-      <StepHeading title={m.title} />
-
       <section className="panel p-5 sm:p-7" aria-labelledby="skills-q">
         <div className="flex flex-wrap items-baseline justify-between gap-2">
           <h2 id="skills-q" className="text-[18px] font-bold">
@@ -72,11 +70,21 @@ export function MotivationStep() {
           onChange={(v) => update({ skillsOther: v })}
           onBlur={() => touch("skillsOther")}
           error={err("skillsOther")}
+          placeholder={m.ph.skillsOther}
           maxLength={300}
         />
       </section>
+  );
+}
 
-      <section className="panel mt-5 space-y-6 p-5 sm:p-7" aria-labelledby="motivation-h">
+/** Motivation section of the "Skills & experience" step. */
+export function MotivationSection() {
+  const { t, locale } = useLocale();
+  const { data, update, err, touch } = useWizard();
+  const m = t.motivation;
+
+  return (
+      <section className="panel space-y-6 p-5 sm:p-7" aria-labelledby="motivation-h">
         <h2 id="motivation-h" className="text-[18px] font-bold">
           {m.motivationTitle}
         </h2>
@@ -87,6 +95,7 @@ export function MotivationStep() {
           onChange={(v) => update({ motivationWhy: v })}
           onBlur={() => touch("motivationWhy")}
           error={err("motivationWhy")}
+          placeholder={m.ph.why}
           maxLength={1500}
         />
         <TextAreaField
@@ -96,6 +105,7 @@ export function MotivationStep() {
           onChange={(v) => update({ motivationContribute: v })}
           onBlur={() => touch("motivationContribute")}
           error={err("motivationContribute")}
+          placeholder={m.ph.contribute}
           maxLength={1500}
           rows={3}
         />
@@ -107,6 +117,7 @@ export function MotivationStep() {
           onChange={(v) => update({ motivationLearn: v })}
           onBlur={() => touch("motivationLearn")}
           error={err("motivationLearn")}
+          placeholder={m.ph.learn}
           maxLength={1500}
           rows={3}
         />
@@ -120,6 +131,5 @@ export function MotivationStep() {
           columns={4}
         />
       </section>
-    </div>
   );
 }

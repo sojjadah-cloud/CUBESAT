@@ -10,7 +10,6 @@ import { CategoryStep } from "@/components/wizard/steps/CategoryStep";
 import { TeamsStep } from "@/components/wizard/steps/TeamsStep";
 import { StudentStep } from "@/components/wizard/steps/StudentStep";
 import { ExperienceStep } from "@/components/wizard/steps/ExperienceStep";
-import { MotivationStep } from "@/components/wizard/steps/MotivationStep";
 import { AttachmentsStep } from "@/components/wizard/steps/AttachmentsStep";
 import { ReviewStep } from "@/components/wizard/steps/ReviewStep";
 import { SuccessScreen } from "@/components/wizard/SuccessScreen";
@@ -137,7 +136,7 @@ export function Wizard({ rules, limits }: { rules: InstitutionRules; limits: Lim
           setData(restore(d.data));
           setFiles(Array.isArray(body.files) ? body.files : []);
           max = Math.min(Math.max(0, Number(d.maxStep) || 0), STEPS.length - 1);
-          startIdx = Math.min(Math.max(0, STEPS.indexOf(d.step as StepId)), max);
+          startIdx = Math.min(Math.max(0, STEPS.indexOf((d.step === "motivation" ? "experience" : d.step) as StepId)), max);
           if (typeof d.submissionKey === "string") submissionKey.current = d.submissionKey;
           setNotice("restored");
         }
@@ -414,7 +413,6 @@ export function Wizard({ rules, limits }: { rules: InstitutionRules; limits: Lim
                 {step === "teams" && <TeamsStep />}
                 {step === "student" && <StudentStep />}
                 {step === "experience" && <ExperienceStep />}
-                {step === "motivation" && <MotivationStep />}
                 {step === "attachments" && <AttachmentsStep />}
                 {step === "review" && <ReviewStep submitting={submitting} submitError={submitErrorText} onSubmit={submit} />}
               </div>

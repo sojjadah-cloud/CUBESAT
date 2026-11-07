@@ -111,8 +111,9 @@ export function TextAreaField({
   onBlur,
   maxLength,
   rows = 4,
+  placeholder,
   ...base
-}: BaseProps & { value: string; onChange: (v: string) => void; onBlur?: () => void; maxLength: number; rows?: number }) {
+}: BaseProps & { value: string; onChange: (v: string) => void; onBlur?: () => void; maxLength: number; rows?: number; placeholder?: string }) {
   return (
     <FieldShell {...base} counter={`${value.length} / ${maxLength}`}>
       <textarea
@@ -121,6 +122,7 @@ export function TextAreaField({
         value={value}
         rows={rows}
         maxLength={maxLength}
+        placeholder={placeholder}
         onChange={(e) => onChange(e.target.value)}
         onBlur={onBlur}
         className="input"

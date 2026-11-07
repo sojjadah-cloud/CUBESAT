@@ -71,9 +71,9 @@ export async function POST(req: Request) {
         [
           ref, submissionKey, d.category, d.primaryTeam, null,
           d.fullName.trim(), d.studentId.trim(), studentIdNorm, d.academicLevel, d.department,
-          d.department === "other" ? d.departmentOther.trim() : null,
-          d.specialisation, d.specialisation === "other" ? d.specialisationOther.trim() : null,
-          d.phone.trim(), d.email.trim().toLowerCase(),
+          null,
+          d.specialisation.trim(), null,
+          d.phone.trim(), null,
           JSON.stringify(d.experience), JSON.stringify(Array.from(new Set(d.skills))), d.skillsOther.trim() || null,
           d.motivationWhy.trim(), d.motivationContribute.trim(), d.motivationLearn.trim() || null,
           d.weeklyHours, locale,
