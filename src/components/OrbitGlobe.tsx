@@ -1,10 +1,10 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { geoCircle, geoGraticule10, geoOrthographic, geoPath } from "d3-geo";
+import { geoGraticule10, geoOrthographic, geoPath } from "d3-geo";
 import { feature } from "topojson-client";
 import type { Topology } from "topojson-specification";
-import type { Feature, FeatureCollection, Geometry } from "geojson";
+import type { FeatureCollection, Geometry } from "geojson";
 import landTopo from "world-atlas/land-110m.json";
 
 const W = 480;
@@ -22,32 +22,14 @@ const ORBIT_PERIOD = 16_000;
 const topo = landTopo as unknown as Topology;
 const LAND = feature(topo, topo.objects.land) as unknown as FeatureCollection<Geometry>;
 const GRATICULE = geoGraticule10();
-const ICE: Feature[] = [
-  { type: "Feature", properties: {}, geometry: geoCircle().center([0, 90]).radius(9)() },
-  { type: "Feature", properties: {}, geometry: geoCircle().center([0, -90]).radius(14)() },
-];
 
-// Deterministic pseudo-random so server and client render the same stars and clouds.
+// Deterministic pseudo-random so server and client render the same stars.
 function seeded(seed: number) {
   let s = seed;
   return () => ((s = (s * 16807) % 2147483647) - 1) / 2147483646;
 }
 const rnd = seeded(7);
 const STARS = Array.from({ length: 70 }, () => ({ x: rnd() * W, y: rnd() * H, r: 0.4 + rnd() * 1.1, o: 0.35 + rnd() * 0.6, tw: rnd() < 0.3 }));
-// Cloud systems: short streaks of small puffs, mostly along the storm belts (~±10° and ~±50°).
-const BELTS = [-52, -12, 8, 48, 60, -40, 25];
-const CLOUDS: Feature[] = Array.from({ length: 22 }).flatMap((_, i) => {
-  const lon = rnd() * 360 - 180;
-  const lat = BELTS[i % BELTS.length] + (rnd() - 0.5) * 16;
-  const puffs = 3 + Math.floor(rnd() * 4);
-  return Array.from({ length: puffs }, (_, j) => ({
-    type: "Feature" as const,
-    properties: {},
-    geometry: geoCircle()
-      .center([lon + j * (3 + rnd() * 3), lat + (rnd() - 0.5) * 3])
-      .radius(1.6 + rnd() * 3.2)(),
-  }));
-});
 
 /** Satellite position on an inclined circular orbit; z > 0 is in front of the globe. */
 function orbitPoint(t: number) {
@@ -106,7 +88,7 @@ function Satellite() {
   );
 }
 
-/** A turning Earth with real coastlines, clouds and a CubeSat in orbit; static when reduced motion is preferred. */
+/** A turning Earth with real coastlines and a CubeSat in orbit; static when reduced motion is preferred. */
 export function OrbitGlobe({ title, className = "" }: { title: string; className?: string }) {
   const [now, setNow] = useState(0);
   const [still, setStill] = useState(false);
@@ -123,7 +105,7 @@ export function OrbitGlobe({ title, className = "" }: { title: string; className
   const frontSat = useRef<SVGGElement>(null);
 
   // The satellite moves every frame by updating its transform directly (no React render);
-  // the Earth re-renders at a steady, lower rate because redrawing coastlines and clouds is heavier.
+  // the Earth re-renders at a steady, lower rate because redrawing coastlines is heavier.
   useEffect(() => {
     if (still) return;
     let raf = 0;
@@ -148,23 +130,19 @@ export function OrbitGlobe({ title, className = "" }: { title: string; className
   }, [still]);
 
   const lon = -40 + (now / EARTH_PERIOD) * 360;
-  const { land, clouds, ice, grid } = useMemo(() => {
+  const { land, grid } = useMemo(() => {
     const projection = geoOrthographic().translate([CX, CY]).scale(R).clipAngle(90).rotate([lon, AXIAL_TILT]);
-    const cloudProjection = geoOrthographic().translate([CX, CY]).scale(R + 1.5).clipAngle(90).rotate([lon * 1.25 + 30, AXIAL_TILT]);
     const p = geoPath(projection);
-    const pc = geoPath(cloudProjection);
     return {
       land: p(LAND) ?? "",
-      ice: ICE.map((f) => p(f) ?? "").join(""),
       grid: p(GRATICULE) ?? "",
-      clouds: CLOUDS.map((f) => pc(f) ?? "").join(""),
     };
   }, [lon]);
 
   const initial = satTransform(SAT_START);
 
   // Separate stacked SVG layers, so the moving satellite and twinkling stars
-  // don't force the blurred clouds and globe to repaint every frame.
+  // don't force the globe to repaint every frame.
   const layer = "absolute inset-0 h-full w-full";
   const vb = `0 0 ${W} ${H}`;
   return (
@@ -215,12 +193,6 @@ export function OrbitGlobe({ title, className = "" }: { title: string; className
           <stop offset=".5" stopColor="#C99A2E" />
           <stop offset="1" stopColor="#8E6A1C" />
         </linearGradient>
-        <filter id="iceBlur" x="-10%" y="-10%" width="120%" height="120%">
-          <feGaussianBlur stdDeviation="1.6" />
-        </filter>
-        <filter id="cloudBlur" x="-10%" y="-10%" width="120%" height="120%">
-          <feGaussianBlur stdDeviation="2.6" />
-        </filter>
         <clipPath id="globe">
           <circle cx={CX} cy={CY} r={R} />
         </clipPath>
@@ -251,8 +223,6 @@ export function OrbitGlobe({ title, className = "" }: { title: string; className
       <g clipPath="url(#globe)">
         <path d={grid} fill="none" stroke="#9FD3FF" strokeOpacity=".08" strokeWidth=".6" />
         <path d={land} fill="url(#landTone)" stroke="#9DBF86" strokeOpacity=".35" strokeWidth=".5" />
-        <path d={ice} fill="#EEF4FA" opacity=".7" filter="url(#iceBlur)" />
-        <path d={clouds} fill="#FFFFFF" opacity=".5" filter="url(#cloudBlur)" />
         <circle cx={CX} cy={CY} r={R} fill="url(#night)" />
         <circle cx={CX} cy={CY} r={R} fill="url(#shine)" />
       </g>
