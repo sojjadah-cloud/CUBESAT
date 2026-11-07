@@ -1,4 +1,4 @@
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import bcrypt from "bcryptjs";
 import { query, queryOne } from "@/lib/db";
@@ -13,6 +13,8 @@ export interface AdminUser {
   email: string;
   name: string;
   role: Role;
+  /** Signed in automatically because the portal was opened on this computer. */
+  local?: boolean;
 }
 
 export const hashPassword = (password: string) => bcrypt.hash(password, 12);
@@ -57,16 +59,34 @@ export async function destroySession() {
   jar.delete(SESSION_COOKIE);
 }
 
+const LOCAL_HOSTS = ["localhost", "127.0.0.1", "[::1]"];
+
+/** True when this request may use the portal without signing in (opt-in, development, same computer only). */
+export function isLocalAccessHost(host: string | null) {
+  if (process.env.ADMIN_LOCAL_ACCESS !== "true" || process.env.NODE_ENV === "production") return false;
+  const name = (host ?? "").toLowerCase().replace(/:\d+$/, "");
+  return LOCAL_HOSTS.includes(name);
+}
+
+async function localAccessUser(): Promise<AdminUser | null> {
+  if (!isLocalAccessHost((await headers()).get("host"))) return null;
+  const user = await queryOne<AdminUser>(
+    `SELECT id, email, name, role FROM admin_users WHERE active AND role = 'admin' ORDER BY created_at LIMIT 1`,
+  );
+  return user ? { ...user, local: true } : null;
+}
+
 export async function currentAdmin(): Promise<AdminUser | null> {
   const jar = await cookies();
   const token = jar.get(SESSION_COOKIE)?.value;
-  if (!token) return null;
-  return queryOne<AdminUser>(
+  if (!token) return localAccessUser();
+  const session = await queryOne<AdminUser>(
     `SELECT u.id, u.email, u.name, u.role
        FROM admin_sessions s JOIN admin_users u ON u.id = s.user_id
       WHERE s.token_hash = $1 AND s.expires_at > now() AND u.active`,
     [sha256(token)],
   );
+  return session ?? localAccessUser();
 }
 
 /** For server components: redirect to login when not signed in. */
