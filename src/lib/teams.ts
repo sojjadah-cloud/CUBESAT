@@ -34,7 +34,7 @@ export const TEAMS: Team[] = [
     },
     activities: {
       en: ["Building CAD assemblies", "3D-printing test prototypes", "Fit-checks with other subsystems"],
-      ar: ["بناء النماذج المجمّعة بالتصميم الحاسوبي", "طباعة نماذج اختبارية ثلاثية الأبعاد", "اختبارات التوافق مع الأنظمة الأخرى"],
+      ar: ["بناء النماذج المجمّعة باستخدام CAD", "طباعة نماذج اختبارية ثلاثية الأبعاد", "اختبارات التوافق مع الأنظمة الأخرى"],
     },
     skills: ["cad", "solidworks", "fusion360", "autocad", "mech_design", "printing3d"],
   },
@@ -90,7 +90,7 @@ export const TEAMS: Team[] = [
     },
     activities: {
       en: ["Writing embedded C/C++ modules", "Building Python ground tools", "Code reviews with Git"],
-      ar: ["كتابة وحدات برمجية مدمجة بلغة سي وسي++", "بناء أدوات أرضية بلغة بايثون", "مراجعة الشيفرات باستخدام نظام إدارة الإصدارات"],
+      ar: ["كتابة وحدات برمجية مدمجة بلغة C/C++", "بناء أدوات أرضية بلغة Python", "مراجعة الشيفرات باستخدام Git"],
     },
     skills: ["python", "c_cpp", "embedded", "git", "linux", "arduino"],
   },
@@ -164,7 +164,7 @@ export const TEAMS: Team[] = [
     },
     activities: {
       en: ["Modelling in MATLAB/Simulink", "Testing sensors on a bench setup", "Tuning control loops"],
-      ar: ["النمذجة باستخدام ماتلاب وسيمولينك", "اختبار المستشعرات على منصة تجريبية", "ضبط حلقات التحكم"],
+      ar: ["النمذجة باستخدام MATLAB وSimulink", "اختبار المستشعرات على منصة تجريبية", "ضبط حلقات التحكم"],
     },
     skills: ["control_systems", "matlab", "simulink", "sensors", "python", "c_cpp"],
   },
@@ -311,19 +311,20 @@ export interface Skill {
   label: Bi;
 }
 
+// Software and programming languages keep their English names in both languages.
 const s = (id: string, category: Category, en: string, ar = en): Skill => ({ id, category, label: { en, ar } });
 
 export const SKILLS: Skill[] = [
-  s("python", "technical", "Python", "بايثون"),
-  s("c_cpp", "technical", "C/C++", "لغة سي وسي++"),
-  s("arduino", "technical", "Arduino", "أردوينو"),
-  s("matlab", "technical", "MATLAB", "ماتلاب"),
-  s("simulink", "technical", "Simulink", "سيمولينك"),
-  s("solidworks", "technical", "SolidWorks", "سوليدووركس"),
-  s("fusion360", "technical", "Fusion 360", "فيوجن 360"),
-  s("autocad", "technical", "AutoCAD", "أوتوكاد"),
-  s("cad", "technical", "CAD", "التصميم بمساعدة الحاسوب"),
-  s("pcb", "technical", "PCB Design", "تصميم اللوحات الإلكترونية المطبوعة"),
+  s("python", "technical", "Python"),
+  s("c_cpp", "technical", "C/C++"),
+  s("arduino", "technical", "Arduino"),
+  s("matlab", "technical", "MATLAB"),
+  s("simulink", "technical", "Simulink"),
+  s("solidworks", "technical", "SolidWorks"),
+  s("fusion360", "technical", "Fusion 360"),
+  s("autocad", "technical", "AutoCAD"),
+  s("cad", "technical", "CAD"),
+  s("pcb", "technical", "PCB Design", "تصميم PCB"),
   s("electronics", "technical", "Electronics", "الإلكترونيات"),
   s("circuit_design", "technical", "Circuit design", "تصميم الدوائر"),
   s("batteries", "technical", "Batteries & storage", "البطاريات والتخزين"),
@@ -332,8 +333,8 @@ export const SKILLS: Skill[] = [
   s("embedded", "technical", "Embedded systems", "الأنظمة المدمجة"),
   s("digital_electronics", "technical", "Digital electronics", "الإلكترونيات الرقمية"),
   s("networking", "technical", "Networking", "الشبكات"),
-  s("linux", "technical", "Linux", "نظام لينكس"),
-  s("git", "technical", "Git", "إدارة الإصدارات (جِت)"),
+  s("linux", "technical", "Linux"),
+  s("git", "technical", "Git"),
   s("printing3d", "technical", "3D Printing", "الطباعة ثلاثية الأبعاد"),
   s("mech_design", "technical", "Mechanical design", "التصميم الميكانيكي"),
   s("rf", "technical", "RF systems", "أنظمة الترددات الراديوية"),
@@ -346,10 +347,10 @@ export const SKILLS: Skill[] = [
   s("control_systems", "technical", "Control systems", "أنظمة التحكم"),
 
   s("graphic_design", "non_technical", "Graphic design", "التصميم الجرافيكي"),
-  s("canva", "non_technical", "Canva", "كانفا"),
-  s("illustrator", "non_technical", "Adobe Illustrator", "أدوبي إليستريتور"),
-  s("photoshop", "non_technical", "Photoshop", "فوتوشوب"),
-  s("figma", "non_technical", "Figma", "فيغما"),
+  s("canva", "non_technical", "Canva"),
+  s("illustrator", "non_technical", "Adobe Illustrator"),
+  s("photoshop", "non_technical", "Photoshop"),
+  s("figma", "non_technical", "Figma"),
   s("video_editing", "non_technical", "Video editing", "تحرير الفيديو"),
   s("public_speaking", "non_technical", "Public speaking", "الإلقاء والتحدث أمام الجمهور"),
   s("content_writing", "non_technical", "Content writing", "كتابة المحتوى"),

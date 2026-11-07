@@ -37,7 +37,7 @@ export async function GET(req: Request) {
         if (!g?.has || !g.entries?.length) return [k, "None"];
         const names = g.entries.map((e) => {
           const x = e as unknown as Record<string, string>;
-          return [x.title || x.name, x.organiser || x.provider, x.year].filter(Boolean).join(" — ");
+          return [x.name || x.title, x.where || x.organiser || x.provider, x.details].filter(Boolean).join(" — ");
         });
         return [k, names.join(" | ")];
       }),

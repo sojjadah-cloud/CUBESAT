@@ -38,7 +38,14 @@ function restore(raw: unknown): ApplicationData {
   merged.experience = { ...base.experience };
   for (const k of EXPERIENCE_KEYS) {
     const g = d.experience?.[k];
-    if (g && Array.isArray(g.entries)) merged.experience[k] = { has: typeof g.has === "boolean" ? g.has : null, entries: g.entries } as never;
+    if (g && Array.isArray(g.entries)) {
+      // Older drafts stored per-type fields (title, organiser, provider…); map them to name / where.
+      const entries = g.entries.map((raw) => {
+        const e = raw as unknown as Record<string, string>;
+        return { id: e.id, name: e.name ?? e.title ?? "", where: e.where ?? e.organiser ?? e.provider ?? "", details: e.details ?? "" };
+      });
+      merged.experience[k] = { has: typeof g.has === "boolean" ? g.has : null, entries };
+    }
   }
   delete (merged as Partial<ApplicationData> & { secondaryTeam?: unknown }).secondaryTeam;
   merged.skills = Array.isArray(d.skills) ? d.skills.filter((s) => typeof s === "string") : [];

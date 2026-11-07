@@ -42,13 +42,14 @@ function Section({
   );
 }
 
+/** Question and answer on the same line; the question is tinted so the two are easy to tell apart. */
 function Rows({ rows }: { rows: [string, React.ReactNode][] }) {
   return (
-    <dl className="grid gap-x-6 gap-y-3 sm:grid-cols-[minmax(140px,220px)_1fr]">
+    <dl className="divide-y divide-line/70 overflow-hidden rounded-[10px] border border-line/70">
       {rows.map(([k, v]) => (
-        <div key={k} className="contents">
-          <dt className="text-[13px] text-ink-muted">{k}</dt>
-          <dd className="text-[14px] text-ink [overflow-wrap:anywhere]">{v}</dd>
+        <div key={k} className="grid grid-cols-[minmax(0,2fr)_minmax(0,3fr)] items-start">
+          <dt className="h-full bg-orbit/[0.08] px-3 py-2.5 text-[13px] font-semibold text-orbit-ink">{k}</dt>
+          <dd className="px-3 py-2.5 text-[14px] text-ink [overflow-wrap:anywhere]">{v}</dd>
         </div>
       ))}
     </dl>
@@ -81,29 +82,16 @@ export function ApplicationSummary({
   const none = <span className="text-ink-faint">{r.noneProvided}</span>;
   const val = (v: string | null | undefined) => (v && v.trim() ? v : none);
 
-  const entryLines = (key: ExperienceKey, e: Record<string, string>) => {
-    switch (key) {
-      case "workshops":
-        return { title: e.title, meta: [e.organiser, e.year], extra: [[f.topics, e.topics], [f.skills, e.skills]] };
-      case "courses":
-        return {
-          title: e.name,
-          meta: [e.provider, e.year],
-          extra: [[f.mainSkills, e.skills], [f.certificate, e.certificate ? (e.certificate === "yes" ? t.common.yes : t.common.no) : ""]],
-        };
-      case "competitions":
-        return {
-          title: e.name,
-          meta: [e.organiser, e.year, e.scope ? f.scopes[e.scope as keyof typeof f.scopes] : "", e.mode ? (e.mode === "team" ? f.team : f.individual) : ""],
-          extra: [[f.result, e.result], [f.role, e.role]],
-        };
-      case "projects":
-        return {
-          title: e.name,
-          meta: [e.role],
-          extra: [[f.description, e.description], [f.technologies, e.technologies], [f.outcome, e.outcome], [f.url, e.url]],
-        };
-    }
+  const entryRows = (key: ExperienceKey, raw: Record<string, string>): [string, React.ReactNode][] => {
+    // Older drafts used per-type fields; fall back to them so nothing is lost.
+    const name = raw.name || raw.title || "";
+    const where = raw.where || raw.organiser || raw.provider || "";
+    const rows: [string, React.ReactNode][] = [
+      [f.name[key], name],
+      [f.where, where],
+    ];
+    if (raw.details?.trim()) rows.push([f.details, <span key="d" className="whitespace-pre-line" dir="auto">{raw.details}</span>]);
+    return rows;
   };
 
   return (
@@ -133,50 +121,37 @@ export function ApplicationSummary({
       )}
 
       <Section title={r.experience} step="experience" onEdit={onEdit} editLabel={t.common.edit}>
-        <div className="mb-6 border-b border-line/70 pb-5">
-          <h3 className="mb-2 text-[14px] font-semibold text-ink">{r.skills}</h3>
-          {data.skills.length ? (
-            <ul className="flex flex-wrap gap-1.5">
-              {data.skills.map((id) => (
-                <li key={id} className="rounded-md border border-line px-2.5 py-1 text-[13px] text-ink-muted" dir="auto">
-                  {skillById(id)?.label[locale] ?? id}
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p className="text-[13px] text-ink-faint">{r.none}</p>
-          )}
-          {data.skillsOther?.trim() && <p className="mt-2 text-[13px] text-ink-muted" dir="auto">{t.motivation.skillsOther}: {data.skillsOther}</p>}
-        </div>
-        <div className="space-y-5">
+        <Rows
+          rows={[
+            [
+              r.skills,
+              data.skills.length ? (
+                <ul key="s" className="flex flex-wrap gap-1.5">
+                  {data.skills.map((id) => (
+                    <li key={id} className="rounded-md border border-line bg-white px-2 py-0.5 text-[13px]" dir="auto">
+                      {skillById(id)?.label[locale] ?? id}
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                none
+              ),
+            ],
+            [t.motivation.skillsOther, <span key="o" dir="auto">{val(data.skillsOther)}</span>],
+          ]}
+        />
+        <div className="mt-5 space-y-4">
           {EXPERIENCE_KEYS.map((key) => {
             const g = data.experience[key];
             return (
               <div key={key}>
                 <h3 className="text-[14px] font-semibold text-ink">{t.experience.groups[key].title}</h3>
                 {g.has && g.entries.length ? (
-                  <ul className="mt-2 space-y-2.5">
-                    {g.entries.map((raw) => {
-                      const e = entryLines(key, raw as unknown as Record<string, string>);
-                      const extras = e.extra.filter(([, v]) => v && v.trim());
-                      return (
-                        <li key={raw.id} className="rounded-[10px] border border-line/70 bg-space-950/40 px-4 py-3">
-                          <p className="text-[14px] font-medium text-ink">{e.title}</p>
-                          <p className="text-[13px] text-ink-muted">{e.meta.filter(Boolean).join(" · ")}</p>
-                          {extras.length > 0 && (
-                            <dl className="mt-2 space-y-1 text-[13px]">
-                              {extras.map(([k, v]) => (
-                                <div key={k} className="flex flex-wrap gap-x-2">
-                                  <dt className="text-ink-faint">{k}:</dt>
-                                  <dd className="text-ink-muted [overflow-wrap:anywhere]" dir="auto">{v}</dd>
-                                </div>
-                              ))}
-                            </dl>
-                          )}
-                        </li>
-                      );
-                    })}
-                  </ul>
+                  <div className="mt-2 space-y-2.5">
+                    {g.entries.map((entry) => (
+                      <Rows key={entry.id} rows={entryRows(key, entry as unknown as Record<string, string>)} />
+                    ))}
+                  </div>
                 ) : (
                   <p className="mt-1 text-[13px] text-ink-faint">{g.has === null ? "—" : r.noExperience}</p>
                 )}

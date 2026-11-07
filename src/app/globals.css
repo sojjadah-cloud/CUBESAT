@@ -84,7 +84,7 @@ html[lang="ar"] {
   textarea.input { @apply min-h-[112px] resize-y leading-relaxed; }
 
   .chip {
-    @apply inline-flex min-h-[40px] items-center gap-2 rounded-full border border-line bg-white px-4 text-[14px] text-ink-muted transition-colors hover:border-[#A9B7C9] hover:text-ink;
+    @apply inline-flex min-h-[40px] items-center gap-2 rounded-[10px] border border-line bg-white px-4 text-[14px] text-ink-muted transition-colors hover:border-[#A9B7C9] hover:text-ink;
   }
   .chip[aria-pressed="true"] { @apply border-orbit bg-orbit/15 text-ink; }
 

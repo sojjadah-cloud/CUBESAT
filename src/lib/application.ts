@@ -4,21 +4,23 @@ import { ACADEMIC_LEVELS, DEPARTMENTS, WEEKLY_HOURS, type InstitutionRules } fro
 
 /* ────────────────────────── Data shape ────────────────────────── */
 
-export interface WorkshopEntry { id: string; title: string; organiser: string; year: string; topics: string; skills: string }
-export interface CourseEntry { id: string; name: string; provider: string; year: string; skills: string; certificate: "" | "yes" | "no" }
-export interface CompetitionEntry {
-  id: string; name: string; organiser: string; year: string;
-  scope: "" | "local" | "national" | "regional" | "international";
-  mode: "" | "team" | "individual"; result: string; role: string;
+/** Every experience entry (workshop, course, competition, project) has the same three parts. */
+export interface ExperienceEntry {
+  id: string;
+  /** Name of the workshop / course / competition / project. */
+  name: string;
+  /** Where it took place or who ran it. */
+  where: string;
+  /** Anything else the student wants to share about it (optional). */
+  details: string;
 }
-export interface ProjectEntry { id: string; name: string; description: string; technologies: string; role: string; outcome: string; url: string }
 
 export interface ExperienceGroup<T> { has: boolean | null; entries: T[] }
 export interface Experience {
-  workshops: ExperienceGroup<WorkshopEntry>;
-  courses: ExperienceGroup<CourseEntry>;
-  competitions: ExperienceGroup<CompetitionEntry>;
-  projects: ExperienceGroup<ProjectEntry>;
+  workshops: ExperienceGroup<ExperienceEntry>;
+  courses: ExperienceGroup<ExperienceEntry>;
+  competitions: ExperienceGroup<ExperienceEntry>;
+  projects: ExperienceGroup<ExperienceEntry>;
 }
 export type ExperienceKey = keyof Experience;
 export const EXPERIENCE_KEYS: ExperienceKey[] = ["workshops", "courses", "competitions", "projects"];
@@ -70,14 +72,7 @@ export const emptyApplication = (): ApplicationData => ({
   consent: false,
 });
 
-export const newEntry = (key: ExperienceKey, id: string) => {
-  switch (key) {
-    case "workshops": return { id, title: "", organiser: "", year: "", topics: "", skills: "" } satisfies WorkshopEntry;
-    case "courses": return { id, name: "", provider: "", year: "", skills: "", certificate: "" } satisfies CourseEntry;
-    case "competitions": return { id, name: "", organiser: "", year: "", scope: "", mode: "", result: "", role: "" } satisfies CompetitionEntry;
-    case "projects": return { id, name: "", description: "", technologies: "", role: "", outcome: "", url: "" } satisfies ProjectEntry;
-  }
-};
+export const newEntry = (id: string): ExperienceEntry => ({ id, name: "", where: "", details: "" });
 
 export const MAX_ENTRIES = 10;
 
@@ -93,41 +88,7 @@ export type FieldErrors = Record<string, ErrorCode>;
 const req = (max = 200) => z.string().trim().min(1, "required").max(max, "tooLong");
 const opt = (max = 500) => z.string().trim().max(max, "tooLong");
 
-const currentYear = () => new Date().getFullYear();
-const year = z
-  .string()
-  .trim()
-  .min(1, "required")
-  .refine((v) => /^\d{4}$/.test(v) && +v >= 1990 && +v <= currentYear(), "year");
-
-const optionalUrl = z
-  .string()
-  .trim()
-  .max(300, "tooLong")
-  .refine((v) => {
-    if (!v) return true;
-    try {
-      const u = new URL(v);
-      return u.protocol === "https:" || u.protocol === "http:";
-    } catch {
-      return false;
-    }
-  }, "url");
-
-const workshop = z.object({ id: z.string(), title: req(), organiser: req(), year, topics: opt(), skills: opt() });
-const course = z.object({
-  id: z.string(), name: req(), provider: req(), year, skills: opt(),
-  certificate: z.enum(["", "yes", "no"]),
-});
-const competition = z.object({
-  id: z.string(), name: req(), organiser: req(), year,
-  scope: z.enum(["", "local", "national", "regional", "international"]),
-  mode: z.enum(["", "team", "individual"]),
-  result: opt(300), role: opt(300),
-});
-const project = z.object({
-  id: z.string(), name: req(), description: req(1000), technologies: opt(), role: req(300), outcome: opt(), url: optionalUrl,
-});
+const entry = z.object({ id: z.string(), name: req(), where: req(), details: opt(1000) });
 
 // Entries are only validated when the student answered "Yes": fields left over
 // from switching Yes → No are hidden and must never block the form.
@@ -189,10 +150,10 @@ export function buildSchemas(rules: InstitutionRules) {
 
   const experience = z.object({
     experience: z.object({
-      workshops: group(workshop),
-      courses: group(course),
-      competitions: group(competition),
-      projects: group(project),
+      workshops: group(entry),
+      courses: group(entry),
+      competitions: group(entry),
+      projects: group(entry),
     }),
   });
 
