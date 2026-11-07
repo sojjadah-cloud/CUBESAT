@@ -94,13 +94,11 @@ export function TeamsStep() {
   const { data, err } = useWizard();
   if (!data.category) return null;
   const teams = teamsFor(data.category);
-  const catTitle = data.category === "technical" ? t.category.technical.title : t.category.nonTechnical.title;
   const error = err("primaryTeam");
 
   return (
     <div>
-      <StepHeading eyebrow={catTitle} title={t.teams.title} lead={t.teams.explanation} />
-      {data.category === "non_technical" && <p className="-mt-4 mb-6 text-[14px] text-ink-muted">{t.teams.openToAll}</p>}
+      <StepHeading title={t.teams.title} />
 
       <div role="radiogroup" aria-labelledby="step-heading" id="f-primaryTeam" tabIndex={-1} className="grid gap-4 md:grid-cols-2">
         {teams.map((team) => (

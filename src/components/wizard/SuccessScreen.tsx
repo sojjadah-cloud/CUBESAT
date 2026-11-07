@@ -41,7 +41,6 @@ export function SuccessScreen({ reference }: { reference: string }) {
             <span aria-live="polite">{copied ? s.copied : s.copy}</span>
           </button>
         </div>
-        <p className="mt-3 text-[12px] text-ink-faint">{s.keep}</p>
       </div>
 
       <div className="no-print mt-8 flex flex-col justify-center gap-3 sm:flex-row">

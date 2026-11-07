@@ -202,7 +202,7 @@ export function AttachmentsStep() {
 
   return (
     <div>
-      <StepHeading eyebrow={t.steps.attachments} title={a.title} lead={a.lead} />
+      <StepHeading title={a.title} lead={t.common.optional} />
 
       <section className="panel p-5 sm:p-7" aria-labelledby="img-h">
         <h2 id="img-h" className="text-[18px] font-bold">

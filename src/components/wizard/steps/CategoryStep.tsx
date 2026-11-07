@@ -26,7 +26,7 @@ export function CategoryStep() {
 
   return (
     <div>
-      <StepHeading eyebrow={t.steps.category} title={t.category.question} lead={t.category.lead} />
+      <StepHeading title={t.category.question} />
       <div role="radiogroup" aria-labelledby="step-heading" id="f-category" tabIndex={-1} className="grid gap-5 md:grid-cols-2">
         {cards.map(({ id, icon: Icon, info, accent }) => {
           const selected = data.category === id;
@@ -66,10 +66,6 @@ export function CategoryStep() {
                   </span>
                 ))}
               </div>
-              <p className="mt-4 text-[13px] text-ink-faint">
-                {t.category.subteams(teams.length)}
-                {id === "non_technical" && <> · {t.category.openToAll}</>}
-              </p>
               {selected && <span className="sr-only">{t.category.selected}</span>}
             </button>
           );

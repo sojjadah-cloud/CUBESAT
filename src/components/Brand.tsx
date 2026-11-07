@@ -87,18 +87,6 @@ export function CubeSatIllustration({
         <circle cx="303" cy="170" r="2.6" fill="#E83B3B" />
       </g>
 
-      {/* Dimension annotation */}
-      <g stroke="#7F95B2" strokeWidth="1" fill="none">
-        <path d="M324 170V280" />
-        <path d="M319 170h10M319 280h10" />
-      </g>
-      <text x="336" y="230" fill="#AFC2D8" fontSize="12" fontFamily="var(--font-body), sans-serif">
-        {labels.unit}
-      </text>
-      <text x="40" y="70" fill="#7F95B2" fontSize="11" fontFamily="var(--font-body), sans-serif" letterSpacing=".06em">
-        {labels.label}
-      </text>
-      <path d="M40 78h66" stroke="#294365" />
     </svg>
   );
 }

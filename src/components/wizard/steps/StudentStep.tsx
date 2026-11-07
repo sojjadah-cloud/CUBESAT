@@ -32,9 +32,9 @@ export function StudentStep() {
 
   return (
     <div>
-      <StepHeading eyebrow={t.steps.student} title={s.title} lead={s.lead} />
+      <StepHeading title={s.title} />
       <div className="panel grid gap-x-5 gap-y-6 p-5 sm:grid-cols-2 sm:p-7">
-        <TextField {...bind("fullName")} label={s.fullName} hint={s.fullNameHint} autoComplete="name" maxLength={120} className="sm:col-span-2" />
+        <TextField {...bind("fullName")} label={s.fullName} autoComplete="name" maxLength={120} className="sm:col-span-2" />
         <TextField {...bind("studentId")} label={s.studentId} hint={studentIdHint} autoComplete="off" ltr maxLength={40} />
         <SelectField
           {...bind("academicLevel")}

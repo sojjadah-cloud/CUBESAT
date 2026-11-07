@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import Link from "next/link";
 import { AlertCircle, ArrowLeft, ArrowRight, Check, CloudOff, Info, Loader2, RotateCcw, Save, X } from "lucide-react";
 import { useLocale } from "@/components/LocaleProvider";
 import { Header } from "@/components/Header";
@@ -368,7 +367,7 @@ export function Wizard({ rules, limits }: { rules: InstitutionRules; limits: Lim
 
   return (
     <WizardContext.Provider value={ctx}>
-      <Header variant="apply" />
+      <Header />
       {!reference && loaded && <Progress index={index} maxIndex={maxIndex} onJump={(i) => goToIndex(i)} />}
 
       <main id="main" className="relative">
@@ -428,10 +427,7 @@ export function Wizard({ rules, limits }: { rules: InstitutionRules; limits: Lim
         <div className="fixed inset-x-0 bottom-0 z-30 border-t border-line/80 bg-space-950/92 backdrop-blur-md no-print">
           <div className="container-page flex max-w-[920px] items-center justify-between gap-3 py-3">
             {index === 0 ? (
-              <Link href="/" className="btn-secondary">
-                <Prev className="h-4 w-4" aria-hidden="true" />
-                <span className="hidden sm:inline">{t.common.home}</span>
-              </Link>
+              <span className="min-w-[44px]" aria-hidden="true" />
             ) : (
               <button type="button" onClick={back} className="btn-secondary">
                 <Prev className="h-4 w-4" aria-hidden="true" />

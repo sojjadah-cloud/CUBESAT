@@ -37,7 +37,7 @@ export function MotivationStep() {
 
   return (
     <div>
-      <StepHeading eyebrow={t.steps.motivation} title={m.title} />
+      <StepHeading title={m.title} />
 
       <section className="panel p-5 sm:p-7" aria-labelledby="skills-q">
         <div className="flex flex-wrap items-baseline justify-between gap-2">
@@ -83,7 +83,6 @@ export function MotivationStep() {
         <TextAreaField
           name="motivationWhy"
           label={m.why}
-          hint={m.whyHint}
           value={data.motivationWhy}
           onChange={(v) => update({ motivationWhy: v })}
           onBlur={() => touch("motivationWhy")}

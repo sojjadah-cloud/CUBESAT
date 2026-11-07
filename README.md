@@ -1,10 +1,10 @@
-# MTC CubeSat Project — Student Recruitment Platform
+# MTC CubeSat Society — Student Recruitment Platform
 
-The bilingual (Arabic RTL / English LTR) recruitment portal for the MTC CubeSat Project at the Military Technological College, Sultanate of Oman. It has three parts:
+The bilingual (Arabic RTL / English LTR) recruitment portal for the MTC CubeSat Society at the Military Technological College, Sultanate of Oman. It has three parts:
 
-- **Public site**: a short home page (`/`) plus separate pages for the project (`/about`), the teams (`/teams`, with one page per team at `/teams/[id]`) and how to apply (`/how-to-apply`). Arabic mode is entirely in Arabic, including software and team names. English mode is entirely in English. The only exception is the language-switch button, which shows the other language's name.
+- **Public site**: three pages that only go forward: home (`/`) → about (`/about`) → teams (`/teams`) → application. There is no menu or side pages. The name "MTC CubeSat Society" is kept in English in both languages; everything else follows the selected language.
 - **Application wizard** (`/apply`): seven steps: team area → one team → student details → experience → skills & motivation → attachments → review & submit.
-- **Team portal** (`/admin`): dashboard, search and filters, applicant profiles, status workflow, internal notes, private document viewing, CSV export and an audit log.
+- **Team portal** (`/admin`, not linked from the public pages): dashboard, search and filters, applicant profiles, status workflow, internal notes, private document viewing, CSV export and an audit log.
 
 ## Stack
 

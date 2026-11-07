@@ -1,8 +1,8 @@
 export const en = {
   dir: "ltr" as "ltr" | "rtl",
   common: {
-    appName: "MTC CubeSat",
-    projectName: "MTC CubeSat Project",
+    appName: "MTC CubeSat Society",
+    projectName: "MTC CubeSat Society",
     college: "Military Technological College · Sultanate of Oman",
     tagline: "From Classroom to Orbit",
     switchTo: "العربية",
@@ -29,13 +29,15 @@ export const en = {
     mb: "MB",
     kb: "KB",
     learnMore: "Learn more",
+    next: "Next",
+    start: "Start",
   },
-  nav: { home: "Home", about: "The project", teams: "Teams", process: "How to apply", apply: "Apply", menu: "Main navigation" },
+  nav: { home: "Home", about: "About the Society", teams: "Teams", process: "How to apply", apply: "Apply", menu: "Main navigation" },
   landing: {
     eyebrow: "Student recruitment · Educational CubeSat",
-    title: "MTC CubeSat Project",
+    title: "MTC CubeSat Society",
     lead:
-      "The MTC CubeSat Project aims to establish a multidisciplinary student team at the Military Technological College to design, develop, and test an educational CubeSat.",
+      "The MTC CubeSat Society aims to establish a multidisciplinary student team at the Military Technological College to design, develop, and test an educational CubeSat.",
     lead2:
       "The initiative provides students with opportunities to apply academic knowledge in a practical engineering environment, strengthen technical and professional skills, and contribute to collaborative research, innovation, and space systems development.",
     cta: "Start Your Application",
@@ -75,8 +77,8 @@ export const en = {
     beginnersTitle: "Beginners are encouraged to apply",
     beginnersBody:
       "Previous workshops, competitions or projects are welcome but not required. Curiosity, commitment and willingness to learn matter most.",
-    footer: "MTC CubeSat Project — Military Technological College, Sultanate of Oman.",
-    illustration: { title: "Illustration of a CubeSat in orbit", unit: "100 mm", label: "1U · CUBESAT" },
+    footer: "MTC CubeSat Society — Military Technological College, Sultanate of Oman.",
+    illustration: { title: "Illustration of a CubeSat in orbit", unit: "", label: "" },
     explore: "Explore the programme",
     cards: {
       about: "Our mission, what the project is, and what students gain.",
@@ -109,7 +111,7 @@ export const en = {
     leaveWarning: "You have unsaved changes.",
   },
   category: {
-    question: "Which area would you like to contribute to within the MTC CubeSat Project?",
+    question: "Which area would you like to contribute to within the MTC CubeSat Society?",
     lead: "Pick the area that suits you best. You'll choose specific sub-teams next.",
     technical: {
       title: "Technical Team",
@@ -230,7 +232,7 @@ export const en = {
     skillsOtherHint: "Separate with commas",
     selectedCount: (n: number) => (n === 1 ? "1 selected" : `${n} selected`),
     motivationTitle: "Your motivation",
-    why: "Why do you want to join MTC CubeSat?",
+    why: "Why do you want to join the MTC CubeSat Society?",
     whyHint: "A few sentences are enough.",
     contribute: "What do you expect to contribute?",
     learn: "What would you like to learn?",
@@ -271,9 +273,9 @@ export const en = {
     noExperience: "No previous participation",
     privacyTitle: "Privacy notice",
     privacy:
-      "Your information is used only by the MTC CubeSat organising team to review applications and contact applicants. Uploaded files are stored privately and are accessible only to authorised administrators. Data is retained for the duration of the recruitment cycle and then deleted in line with the project's retention policy.",
+      "Your information is used only to review your application and contact you. Uploaded files are visible only to authorised administrators.",
     consent:
-      "I confirm that the information provided is accurate and consent to its use for reviewing my MTC CubeSat application and related communications.",
+      "I confirm that the information provided is accurate and consent to its use for reviewing my MTC CubeSat Society application and related communications.",
     submit: "Submit application",
     submitting: "Submitting…",
     submitError: "We couldn't submit your application. Your answers are safe — please try again.",
@@ -282,7 +284,7 @@ export const en = {
   },
   success: {
     title: "Application Submitted Successfully!",
-    body: "Thank you for your interest in the MTC CubeSat Project. Your application will be reviewed, and you will be contacted regarding the next steps.",
+    body: "Thank you for your interest in the MTC CubeSat Society. Your application will be reviewed, and you will be contacted regarding the next steps.",
     reference: "Application reference",
     keep: "Keep this reference for any communication with the organising team.",
     copy: "Copy",
@@ -317,7 +319,7 @@ export const en = {
     portal: "Team portal",
     signIn: "Sign in",
     signInTitle: "Organising team sign-in",
-    signInLead: "Restricted to authorised MTC CubeSat administrators.",
+    signInLead: "Authorised administrators only.",
     email: "Email",
     password: "Password",
     signingIn: "Signing in…",

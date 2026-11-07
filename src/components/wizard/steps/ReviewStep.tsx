@@ -14,7 +14,7 @@ export function ReviewStep({ submitting, submitError, onSubmit }: { submitting: 
 
   return (
     <div>
-      <StepHeading eyebrow={t.steps.review} title={r.title} lead={r.lead} />
+      <StepHeading title={r.title} />
       <ApplicationSummary data={data} files={files} t={t} locale={locale} onEdit={goTo} />
 
       <section className="mt-6 rounded-card border border-line bg-space-900 p-5 sm:p-7" aria-labelledby="privacy-h">

@@ -109,7 +109,6 @@ function Group({ group }: { group: ExperienceKey }) {
         />
       </div>
 
-      {g.has === false && <p className="mt-4 text-[13px] text-ink-faint">{t.experience.noneSelected}</p>}
 
       {g.has === true && (
         <div className="mt-6 space-y-5">
@@ -194,7 +193,7 @@ export function ExperienceStep() {
   const { t } = useLocale();
   return (
     <div>
-      <StepHeading eyebrow={t.steps.experience} title={t.experience.title} lead={t.experience.lead} />
+      <StepHeading title={t.experience.title} />
       <p className="mb-6 flex items-start gap-3 rounded-[12px] border border-signal/30 bg-signal/[0.07] px-4 py-3 text-[14px] text-ink">
         <Sparkles className="mt-[3px] h-4 w-4 shrink-0 text-signal" aria-hidden="true" />
         {t.experience.beginners}
