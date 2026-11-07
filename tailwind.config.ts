@@ -25,10 +25,12 @@ export default {
         "fade-up": { from: { opacity: "0", transform: "translateY(8px)" }, to: { opacity: "1", transform: "none" } },
         orbit: { to: { transform: "rotate(360deg)" } },
         float: { "0%, 100%": { transform: "translateY(0)" }, "50%": { transform: "translateY(-6px)" } },
+        twinkle: { "0%, 100%": { opacity: "0.25" }, "50%": { opacity: "1" } },
       },
       animation: {
         "fade-up": "fade-up 320ms cubic-bezier(.2,.7,.2,1) both",
         orbit: "orbit 60s linear infinite",
+        twinkle: "twinkle 3.5s ease-in-out infinite",
       },
     },
   },

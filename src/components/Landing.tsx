@@ -25,8 +25,8 @@ export function Landing() {
             </Link>
           </div>
 
-          <div className="mx-auto w-full max-w-[480px] rounded-[18px] border border-[#1B3156] bg-[#0B1B33] p-3 shadow-[0_24px_48px_-24px_rgba(11,27,51,0.45)] sm:p-5">
-            <OrbitGlobe className="h-auto w-full" title={t.landing.illustration.title} />
+          <div className="mx-auto w-full max-w-[520px] overflow-hidden rounded-[20px] border border-[#1B3156] bg-[#040B1C] shadow-[0_28px_56px_-24px_rgba(11,27,51,0.55)]">
+            <OrbitGlobe className="w-full" title={t.landing.illustration.title} />
           </div>
         </div>
       </section>

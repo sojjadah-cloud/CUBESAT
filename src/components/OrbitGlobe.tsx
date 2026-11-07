@@ -1,122 +1,271 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { geoCircle, geoGraticule10, geoOrthographic, geoPath } from "d3-geo";
+import { feature } from "topojson-client";
+import type { Topology } from "topojson-specification";
+import type { Feature, FeatureCollection, Geometry } from "geojson";
+import landTopo from "world-atlas/land-110m.json";
 
+const W = 480;
+const H = 440;
 const CX = 240;
-const CY = 220;
-const R = 112; // Earth radius
-const RX = 196; // orbit radii
-const RY = 58;
-const TILT = -16;
+const CY = 222;
+const R = 118; // Earth radius on screen
+const ORBIT_R = 178;
+const ORBIT_FLATTEN = 0.27; // how edge-on the orbit plane looks
+const ORBIT_TILT = (-16 * Math.PI) / 180;
+const AXIAL_TILT = -20; // degrees, applied to the globe's rotation
+const EARTH_PERIOD = 60_000; // ms per full turn
+const ORBIT_PERIOD = 16_000;
 
-// Ellipse as a path, starting on the left and passing in front of the globe first.
-const ORBIT = `M ${CX - RX} ${CY} a ${RX} ${RY} 0 1 0 ${2 * RX} 0 a ${RX} ${RY} 0 1 0 ${-2 * RX} 0`;
-const PERIOD = "14s";
+const topo = landTopo as unknown as Topology;
+const LAND = feature(topo, topo.objects.land) as unknown as FeatureCollection<Geometry>;
+const GRATICULE = geoGraticule10();
+const ICE: Feature[] = [
+  { type: "Feature", properties: {}, geometry: geoCircle().center([0, 90]).radius(9)() },
+  { type: "Feature", properties: {}, geometry: geoCircle().center([0, -90]).radius(14)() },
+];
+
+// Deterministic pseudo-random so server and client render the same stars and clouds.
+function seeded(seed: number) {
+  let s = seed;
+  return () => ((s = (s * 16807) % 2147483647) - 1) / 2147483646;
+}
+const rnd = seeded(7);
+const STARS = Array.from({ length: 70 }, () => ({ x: rnd() * W, y: rnd() * H, r: 0.4 + rnd() * 1.1, o: 0.35 + rnd() * 0.6, tw: rnd() < 0.3 }));
+// Cloud systems: short streaks of small puffs, mostly along the storm belts (~±10° and ~±50°).
+const BELTS = [-52, -12, 8, 48, 60, -40, 25];
+const CLOUDS: Feature[] = Array.from({ length: 22 }).flatMap((_, i) => {
+  const lon = rnd() * 360 - 180;
+  const lat = BELTS[i % BELTS.length] + (rnd() - 0.5) * 16;
+  const puffs = 3 + Math.floor(rnd() * 4);
+  return Array.from({ length: puffs }, (_, j) => ({
+    type: "Feature" as const,
+    properties: {},
+    geometry: geoCircle()
+      .center([lon + j * (3 + rnd() * 3), lat + (rnd() - 0.5) * 3])
+      .radius(1.6 + rnd() * 3.2)(),
+  }));
+});
+
+/** Satellite position on an inclined circular orbit; z > 0 is in front of the globe. */
+function orbitPoint(t: number) {
+  const x0 = ORBIT_R * Math.cos(t);
+  const y0 = ORBIT_R * Math.sin(t) * ORBIT_FLATTEN;
+  const z = ORBIT_R * Math.sin(t);
+  const x = x0 * Math.cos(ORBIT_TILT) - y0 * Math.sin(ORBIT_TILT);
+  const y = x0 * Math.sin(ORBIT_TILT) + y0 * Math.cos(ORBIT_TILT);
+  return { x: CX + x, y: CY + y, z };
+}
+
+function orbitPaths() {
+  const front: string[] = [];
+  const back: string[] = [];
+  const steps = 180;
+  for (let i = 0; i < steps; i++) {
+    const a = orbitPoint((i / steps) * Math.PI * 2);
+    const b = orbitPoint(((i + 1) / steps) * Math.PI * 2);
+    (a.z >= 0 ? front : back).push(`M${a.x.toFixed(1)} ${a.y.toFixed(1)}L${b.x.toFixed(1)} ${b.y.toFixed(1)}`);
+  }
+  return { front: front.join(""), back: back.join("") };
+}
+const ORBIT = orbitPaths();
+
+function satTransform(t: number) {
+  const p = orbitPoint(t);
+  const ahead = orbitPoint(t + 0.01);
+  const angle = (Math.atan2(ahead.y - p.y, ahead.x - p.x) * 180) / Math.PI;
+  const scale = 0.9 + (p.z / ORBIT_R) * 0.18; // slightly larger when closer
+  return { front: p.z >= 0, transform: `translate(${p.x.toFixed(1)} ${p.y.toFixed(1)}) rotate(${angle.toFixed(1)}) scale(${scale.toFixed(3)})` };
+}
+
+const SAT_START = 0.6;
+const EARTH_FPS = 15;
 
 function Satellite() {
+  const cells = (ox: number) =>
+    [0, 1, 2, 3].map((c) => [0, 1].map((r) => <rect key={`${ox}${c}${r}`} x={ox + 1 + c * 6} y={-5 + r * 5} width="5.2" height="4.2" fill="#1F4E8C" />));
   return (
     <g>
-      <rect x="-21" y="-4" width="13" height="8" rx="1" fill="#2F6FB3" stroke="#C9D4E2" strokeWidth=".8" />
-      <rect x="8" y="-4" width="13" height="8" rx="1" fill="#2F6FB3" stroke="#C9D4E2" strokeWidth=".8" />
-      <path d="M-8 0h-1M8 0h1" stroke="#C9D4E2" strokeWidth="1.2" />
-      <rect x="-6" y="-6" width="12" height="12" rx="1.5" fill="#D9E1EB" stroke="#7F95B2" strokeWidth=".8" />
-      <circle cx="0" cy="0" r="1.8" fill="#FFAA18" />
+      {/* panels */}
+      <rect x="-35" y="-6" width="25.5" height="12" rx="1" fill="#0E2B55" stroke="#B8C6D8" strokeWidth=".7" />
+      {cells(-35)}
+      <rect x="9.5" y="-6" width="25.5" height="12" rx="1" fill="#0E2B55" stroke="#B8C6D8" strokeWidth=".7" />
+      {cells(9.5)}
+      <path d="M-9.5 0h-0.5M9.5 0h0.5" stroke="#B8C6D8" strokeWidth="1.4" />
+      {/* body with gold foil */}
+      <rect x="-8" y="-8" width="16" height="16" rx="1.5" fill="url(#foil)" stroke="#7A5A16" strokeWidth=".6" />
+      <path d="M-8 -3h16M-8 3h16" stroke="#8C6A1E" strokeWidth=".5" opacity=".6" />
+      <rect x="-3.5" y="-3.5" width="7" height="7" rx="1" fill="#1A2B44" stroke="#C9D4E2" strokeWidth=".5" />
+      <circle cx="0" cy="0" r="1.6" fill="#7CC4FF" />
+      {/* antenna */}
+      <path d="M0 -8v-7" stroke="#D9E1EB" strokeWidth=".8" />
+      <circle cx="0" cy="-15.5" r="1.3" fill="#FFAA18" />
     </g>
   );
 }
 
-/** A slowly turning Earth with a CubeSat on an inclined orbit; static when reduced motion is preferred. */
+/** A turning Earth with real coastlines, clouds and a CubeSat in orbit; static when reduced motion is preferred. */
 export function OrbitGlobe({ title, className = "" }: { title: string; className?: string }) {
+  const [now, setNow] = useState(0);
   const [still, setStill] = useState(false);
+
   useEffect(() => {
     const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
-    setStill(mq.matches);
-    const on = () => setStill(mq.matches);
-    mq.addEventListener("change", on);
-    return () => mq.removeEventListener("change", on);
+    const update = () => setStill(mq.matches);
+    update();
+    mq.addEventListener("change", update);
+    return () => mq.removeEventListener("change", update);
   }, []);
 
-  const moving = (
-    <animateMotion dur={PERIOD} repeatCount="indefinite" path={ORBIT} />
-  );
-  const sat = (
-    <g transform={still ? `translate(${CX} ${CY + RY})` : undefined}>
-      {!still && moving}
-      <Satellite />
-    </g>
-  );
+  const backSat = useRef<SVGGElement>(null);
+  const frontSat = useRef<SVGGElement>(null);
 
-  // Land shapes, drawn twice side by side so they can scroll seamlessly across the globe.
-  const land = (dx: number) => (
-    <g transform={`translate(${dx} 0)`} fill="#3E9A6B" opacity=".9">
-      <path d="M150 150c18-14 44-12 56 4 10 14-2 30 8 44 8 12-6 26-22 22-14-4-20-18-34-20-16-2-26-14-20-28 2-8 6-16 12-22z" />
-      <path d="M232 230c14-6 30 0 34 14 4 16-8 26-6 42 2 14-12 22-24 14-12-8-8-24-16-34-8-10-2-30 12-36z" />
-      <path d="M286 140c22-10 52-4 62 14 8 14-6 22-2 36 4 12-12 20-26 14-12-6-16-20-30-24-14-4-20-18-12-28 2-4 4-8 8-12z" />
-      <path d="M310 236c10-4 22 2 22 12s-10 14-20 12-14-20-2-24z" />
-      <path d="M176 262c10-6 24-2 26 8 2 12-10 20-22 16-10-4-12-18-4-24z" />
-    </g>
-  );
+  // The satellite moves every frame by updating its transform directly (no React render);
+  // the Earth re-renders at a steady, lower rate because redrawing coastlines and clouds is heavier.
+  useEffect(() => {
+    if (still) return;
+    let raf = 0;
+    let lastEarth = 0;
+    const start = performance.now();
+    const tick = (t: number) => {
+      const elapsed = t - start;
+      const { front, transform } = satTransform(SAT_START + (elapsed / ORBIT_PERIOD) * Math.PI * 2);
+      for (const [el, show] of [[backSat.current, !front], [frontSat.current, front]] as const) {
+        if (!el) continue;
+        el.setAttribute("transform", transform);
+        el.style.display = show ? "" : "none";
+      }
+      if (elapsed - lastEarth > 1000 / EARTH_FPS) {
+        lastEarth = elapsed;
+        setNow(elapsed);
+      }
+      raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [still]);
 
+  const lon = -40 + (now / EARTH_PERIOD) * 360;
+  const { land, clouds, ice, grid } = useMemo(() => {
+    const projection = geoOrthographic().translate([CX, CY]).scale(R).clipAngle(90).rotate([lon, AXIAL_TILT]);
+    const cloudProjection = geoOrthographic().translate([CX, CY]).scale(R + 1.5).clipAngle(90).rotate([lon * 1.25 + 30, AXIAL_TILT]);
+    const p = geoPath(projection);
+    const pc = geoPath(cloudProjection);
+    return {
+      land: p(LAND) ?? "",
+      ice: ICE.map((f) => p(f) ?? "").join(""),
+      grid: p(GRATICULE) ?? "",
+      clouds: CLOUDS.map((f) => pc(f) ?? "").join(""),
+    };
+  }, [lon]);
+
+  const initial = satTransform(SAT_START);
+
+  // Separate stacked SVG layers, so the moving satellite and twinkling stars
+  // don't force the blurred clouds and globe to repaint every frame.
+  const layer = "absolute inset-0 h-full w-full";
+  const vb = `0 0 ${W} ${H}`;
   return (
-    <svg viewBox="0 0 480 440" className={className} role="img" aria-label={title}>
+    <div className={`relative ${className}`} style={{ aspectRatio: `${W} / ${H}` }} role="img" aria-label={title}>
+    <svg viewBox={vb} className={layer} aria-hidden="true">
       <defs>
-        <radialGradient id="ocean" cx="38%" cy="32%" r="75%">
-          <stop offset="0" stopColor="#3D8FD9" />
-          <stop offset=".6" stopColor="#1C5A9E" />
-          <stop offset="1" stopColor="#0E2F5C" />
+        <radialGradient id="space" cx="20%" cy="15%" r="95%">
+          <stop offset="0" stopColor="#13284A" />
+          <stop offset=".55" stopColor="#081631" />
+          <stop offset="1" stopColor="#040B1C" />
         </radialGradient>
-        <radialGradient id="shade" cx="30%" cy="28%" r="80%">
-          <stop offset=".55" stopColor="#000" stopOpacity="0" />
-          <stop offset="1" stopColor="#000" stopOpacity=".45" />
+        <radialGradient id="sun" cx="0%" cy="0%" r="60%">
+          <stop offset="0" stopColor="#FFE7B0" stopOpacity=".35" />
+          <stop offset="1" stopColor="#FFE7B0" stopOpacity="0" />
         </radialGradient>
-        <radialGradient id="glow" cx="50%" cy="50%" r="50%">
-          <stop offset=".78" stopColor="#7CC4FF" stopOpacity=".35" />
-          <stop offset="1" stopColor="#7CC4FF" stopOpacity="0" />
+        <radialGradient id="ocean" cx="36%" cy="30%" r="78%">
+          <stop offset="0" stopColor="#3E8EDB" />
+          <stop offset=".45" stopColor="#1D5FA8" />
+          <stop offset=".85" stopColor="#0D3470" />
+          <stop offset="1" stopColor="#082452" />
         </radialGradient>
-        <clipPath id="earth-clip">
+        {/* Latitude banding: forests near poles and equator, drier subtropics */}
+        <linearGradient id="landTone" x1="0" y1={CY - R} x2="0" y2={CY + R} gradientUnits="userSpaceOnUse">
+          <stop offset="0" stopColor="#5C7F52" />
+          <stop offset=".25" stopColor="#6F9256" />
+          <stop offset=".38" stopColor="#B9A06A" />
+          <stop offset=".5" stopColor="#4F8B45" />
+          <stop offset=".62" stopColor="#A9935F" />
+          <stop offset=".78" stopColor="#6C8C55" />
+          <stop offset="1" stopColor="#5C7F52" />
+        </linearGradient>
+        <radialGradient id="night" cx="30%" cy="26%" r="92%">
+          <stop offset=".42" stopColor="#020617" stopOpacity="0" />
+          <stop offset=".78" stopColor="#020617" stopOpacity=".55" />
+          <stop offset="1" stopColor="#020617" stopOpacity=".88" />
+        </radialGradient>
+        <radialGradient id="shine" cx="32%" cy="26%" r="30%">
+          <stop offset="0" stopColor="#FFFFFF" stopOpacity=".32" />
+          <stop offset="1" stopColor="#FFFFFF" stopOpacity="0" />
+        </radialGradient>
+        <radialGradient id="atmo" cx="50%" cy="50%" r="50%">
+          <stop offset={R / (R + 22)} stopColor="#8FD0FF" stopOpacity=".55" />
+          <stop offset={(R + 6) / (R + 22)} stopColor="#5AAEF5" stopOpacity=".22" />
+          <stop offset="1" stopColor="#5AAEF5" stopOpacity="0" />
+        </radialGradient>
+        <linearGradient id="foil" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stopColor="#F4D47A" />
+          <stop offset=".5" stopColor="#C99A2E" />
+          <stop offset="1" stopColor="#8E6A1C" />
+        </linearGradient>
+        <filter id="iceBlur" x="-10%" y="-10%" width="120%" height="120%">
+          <feGaussianBlur stdDeviation="1.6" />
+        </filter>
+        <filter id="cloudBlur" x="-10%" y="-10%" width="120%" height="120%">
+          <feGaussianBlur stdDeviation="2.6" />
+        </filter>
+        <clipPath id="globe">
           <circle cx={CX} cy={CY} r={R} />
-        </clipPath>
-        <clipPath id="front-half" clipPathUnits="userSpaceOnUse">
-          <rect x="0" y={CY} width="480" height="240" />
         </clipPath>
       </defs>
 
-      {/* Stars */}
+      {/* Space */}
+      <rect width={W} height={H} fill="url(#space)" />
+      <rect width={W} height={H} fill="url(#sun)" />
       <g fill="#F7F9FC">
-        {[
-          [40, 50, 1.2], [96, 120, 0.8], [412, 70, 1.4], [440, 180, 0.9], [60, 330, 1], [380, 380, 0.8],
-          [300, 40, 0.9], [150, 400, 1.1], [24, 210, 0.7], [460, 300, 1.2],
-        ].map(([x, y, r]) => (
-          <circle key={`${x}-${y}`} cx={x} cy={y} r={r} opacity=".7" />
+        {STARS.map((s, i) => (
+          <circle key={i} cx={s.x.toFixed(1)} cy={s.y.toFixed(1)} r={s.r.toFixed(2)} opacity={s.o.toFixed(2)} className={s.tw ? "animate-twinkle" : undefined} style={s.tw ? { animationDelay: `${(i % 7) * 0.6}s` } : undefined} />
         ))}
       </g>
+    </svg>
 
-      <g transform={`rotate(${TILT} ${CX} ${CY})`}>
-        {/* Back half of the orbit and the satellite while behind the globe */}
-        <ellipse cx={CX} cy={CY} rx={RX} ry={RY} fill="none" stroke="#C9D4E2" strokeOpacity=".35" strokeWidth="1.2" strokeDasharray="3 6" />
-        {sat}
-      </g>
-
-      {/* Earth */}
-      <circle cx={CX} cy={CY} r={R + 14} fill="url(#glow)" />
-      <circle cx={CX} cy={CY} r={R} fill="url(#ocean)" />
-      <g clipPath="url(#earth-clip)">
-        <g>
-          {!still && <animateTransform attributeName="transform" type="translate" from="0 0" to="-240 0" dur="40s" repeatCount="indefinite" />}
-          {land(0)}
-          {land(240)}
-        </g>
-        <circle cx={CX} cy={CY} r={R} fill="url(#shade)" />
-      </g>
-      <circle cx={CX} cy={CY} r={R} fill="none" stroke="#9FD3FF" strokeOpacity=".5" strokeWidth="1.5" />
-
-      <g transform={`rotate(${TILT} ${CX} ${CY})`}>
-        {/* Front half of the orbit and the satellite while in front of the globe */}
-        <g clipPath="url(#front-half)">
-          <ellipse cx={CX} cy={CY} rx={RX} ry={RY} fill="none" stroke="#C9D4E2" strokeOpacity=".7" strokeWidth="1.4" />
-          {sat}
-        </g>
+    {/* Orbit behind the globe, and the satellite when it is behind */}
+    <svg viewBox={vb} className={layer} aria-hidden="true">
+      <path d={ORBIT.back} fill="none" stroke="#C9D4E2" strokeOpacity=".22" strokeWidth="1.1" strokeDasharray="2 5" />
+      <g ref={backSat} transform={initial.transform} style={{ display: initial.front ? "none" : undefined }}>
+        <Satellite />
       </g>
     </svg>
+
+    {/* Earth */}
+    <svg viewBox={vb} className={layer} aria-hidden="true">
+      <circle cx={CX} cy={CY} r={R + 22} fill="url(#atmo)" />
+      <circle cx={CX} cy={CY} r={R} fill="url(#ocean)" />
+      <g clipPath="url(#globe)">
+        <path d={grid} fill="none" stroke="#9FD3FF" strokeOpacity=".08" strokeWidth=".6" />
+        <path d={land} fill="url(#landTone)" stroke="#9DBF86" strokeOpacity=".35" strokeWidth=".5" />
+        <path d={ice} fill="#EEF4FA" opacity=".7" filter="url(#iceBlur)" />
+        <path d={clouds} fill="#FFFFFF" opacity=".5" filter="url(#cloudBlur)" />
+        <circle cx={CX} cy={CY} r={R} fill="url(#night)" />
+        <circle cx={CX} cy={CY} r={R} fill="url(#shine)" />
+      </g>
+      <circle cx={CX} cy={CY} r={R} fill="none" stroke="#A8DBFF" strokeOpacity=".55" strokeWidth="1.2" />
+    </svg>
+
+    {/* Orbit in front of the globe, and the satellite when it is in front */}
+    <svg viewBox={vb} className={layer} aria-hidden="true">
+      <path d={ORBIT.front} fill="none" stroke="#DCE6F2" strokeOpacity=".55" strokeWidth="1.3" />
+      <g ref={frontSat} transform={initial.transform} style={{ display: initial.front ? undefined : "none" }}>
+        <Satellite />
+      </g>
+    </svg>
+    </div>
   );
 }
