@@ -1,6 +1,5 @@
-import { cookies, headers } from "next/headers";
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import bcrypt from "bcryptjs";
 import { query, queryOne } from "@/lib/db";
 import { randomToken, sha256, secureCookies } from "@/lib/security";
 
@@ -13,24 +12,17 @@ export interface AdminUser {
   email: string;
   name: string;
   role: Role;
-  /** Signed in automatically because the portal was opened on this computer. */
-  local?: boolean;
 }
 
-export const hashPassword = (password: string) => bcrypt.hash(password, 12);
-
-// Compared against when the email doesn't exist, so response timing doesn't reveal valid accounts.
-let dummyHash: Promise<string> | null = null;
-
-export async function verifyCredentials(email: string, password: string): Promise<AdminUser | null> {
-  const row = await queryOne<AdminUser & { password_hash: string; active: boolean }>(
-    `SELECT id, email, name, role, password_hash, active FROM admin_users WHERE email = $1`,
+/**
+ * Sign-in is by email only (an owner decision): any active admin account's
+ * email opens a session. Accounts are created with `npm run admin:create`.
+ */
+export async function findActiveAdmin(email: string): Promise<AdminUser | null> {
+  return queryOne<AdminUser>(
+    `SELECT id, email, name, role FROM admin_users WHERE email = $1 AND active`,
     [email.trim().toLowerCase()],
   );
-  dummyHash ??= bcrypt.hash(randomToken(), 12);
-  const ok = await bcrypt.compare(password, row?.password_hash ?? (await dummyHash));
-  if (!row || !ok || !row.active) return null;
-  return { id: row.id, email: row.email, name: row.name, role: row.role };
 }
 
 export async function createSession(user: AdminUser, ip: string, userAgent: string | null) {
@@ -59,34 +51,16 @@ export async function destroySession() {
   jar.delete(SESSION_COOKIE);
 }
 
-const LOCAL_HOSTS = ["localhost", "127.0.0.1", "[::1]"];
-
-/** True when this request may use the portal without signing in (opt-in, development, same computer only). */
-export function isLocalAccessHost(host: string | null) {
-  if (process.env.ADMIN_LOCAL_ACCESS !== "true" || process.env.NODE_ENV === "production") return false;
-  const name = (host ?? "").toLowerCase().replace(/:\d+$/, "");
-  return LOCAL_HOSTS.includes(name);
-}
-
-async function localAccessUser(): Promise<AdminUser | null> {
-  if (!isLocalAccessHost((await headers()).get("host"))) return null;
-  const user = await queryOne<AdminUser>(
-    `SELECT id, email, name, role FROM admin_users WHERE active AND role = 'admin' ORDER BY created_at LIMIT 1`,
-  );
-  return user ? { ...user, local: true } : null;
-}
-
 export async function currentAdmin(): Promise<AdminUser | null> {
   const jar = await cookies();
   const token = jar.get(SESSION_COOKIE)?.value;
-  if (!token) return localAccessUser();
-  const session = await queryOne<AdminUser>(
+  if (!token) return null;
+  return queryOne<AdminUser>(
     `SELECT u.id, u.email, u.name, u.role
        FROM admin_sessions s JOIN admin_users u ON u.id = s.user_id
       WHERE s.token_hash = $1 AND s.expires_at > now() AND u.active`,
     [sha256(token)],
   );
-  return session ?? localAccessUser();
 }
 
 /** For server components: redirect to login when not signed in. */

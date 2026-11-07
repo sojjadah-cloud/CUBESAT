@@ -3,11 +3,11 @@
  *
  *   npm run admin:create -- --email lead@example.org --name "Team Lead" --role admin
  *
- * The password is read from the ADMIN_PASSWORD environment variable (never a
- * CLI argument, so it doesn't end up in shell history). Roles: admin | reviewer.
+ * Sign-in is by email only, so no password is needed. Roles: admin | reviewer.
  * Use --disable to deactivate an account.
  */
 import { query, queryOne } from "../src/lib/db";
+import crypto from "node:crypto";
 import { hashPasswordForScript } from "./password";
 
 function arg(name: string) {
@@ -31,10 +31,8 @@ async function main() {
     return;
   }
 
-  const password = process.env.ADMIN_PASSWORD ?? "";
-  if (password.length < 12) throw new Error("Set ADMIN_PASSWORD (at least 12 characters)");
-
-  const hash = await hashPasswordForScript(password);
+  // The column is kept for compatibility; a random unusable hash is stored.
+  const hash = await hashPasswordForScript(crypto.randomUUID());
   const row = await queryOne<{ id: string }>(
     `INSERT INTO admin_users (email, name, password_hash, role)
      VALUES ($1, $2, $3, $4)

@@ -7,14 +7,7 @@ import { NextResponse, type NextRequest } from "next/server";
  */
 export function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
-  const host = (req.headers.get("host") ?? "").toLowerCase().replace(/:\d+$/, "");
-  // Opt-in, development only: the portal opens without signing in on this computer.
-  // The pages and API routes re-check this against the database and environment.
-  const localAccess =
-    process.env.ADMIN_LOCAL_ACCESS === "true" &&
-    process.env.NODE_ENV !== "production" &&
-    ["localhost", "127.0.0.1", "[::1]"].includes(host);
-  const hasSession = Boolean(req.cookies.get("cs_admin")?.value) || localAccess;
+  const hasSession = Boolean(req.cookies.get("cs_admin")?.value);
 
   if (pathname.startsWith("/api/admin")) {
     if (!hasSession && pathname !== "/api/admin/login") {

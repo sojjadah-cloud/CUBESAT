@@ -8,7 +8,7 @@ import { LanguageSwitcher } from "@/components/Header";
 import { LogoMark } from "@/components/Brand";
 import type { Role } from "@/lib/auth";
 
-export function AdminNav({ name, role, local }: { name: string; role: Role; local?: boolean }) {
+export function AdminNav({ name, role }: { name: string; role: Role }) {
   const { t } = useLocale();
   const pathname = usePathname();
   const router = useRouter();
@@ -57,12 +57,10 @@ export function AdminNav({ name, role, local }: { name: string; role: Role; loca
             <span className="text-ink-faint">{t.admin.role[role]}</span>
           </span>
           <LanguageSwitcher />
-          {!local && (
-            <button type="button" onClick={signOut} className="btn-ghost btn-sm" aria-label={t.admin.signOut}>
-              <LogOut className="h-4 w-4 rtl:rotate-180" aria-hidden="true" />
-              <span className="hidden sm:inline">{t.admin.signOut}</span>
-            </button>
-          )}
+          <button type="button" onClick={signOut} className="btn-ghost btn-sm" aria-label={t.admin.signOut}>
+            <LogOut className="h-4 w-4 rtl:rotate-180" aria-hidden="true" />
+            <span className="hidden sm:inline">{t.admin.signOut}</span>
+          </button>
         </div>
       </div>
     </header>

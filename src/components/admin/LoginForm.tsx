@@ -12,14 +12,13 @@ export function LoginForm() {
   const { t } = useLocale();
   const router = useRouter();
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<"invalid" | "rate" | "network" | "missing" | null>(null);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (busy) return;
-    if (!email.trim() || !password) {
+    if (!email.trim()) {
       setError("missing");
       return;
     }
@@ -29,7 +28,7 @@ export function LoginForm() {
       const res = await fetch("/api/admin/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email }),
       });
       if (res.ok) {
         router.replace("/admin");
@@ -68,10 +67,6 @@ export function LoginForm() {
           <div>
             <label htmlFor="email" className="field-label">{t.admin.email}</label>
             <input id="email" type="email" autoComplete="username" required value={email} onChange={(e) => setEmail(e.target.value)} className="input ltr" dir="ltr" />
-          </div>
-          <div>
-            <label htmlFor="password" className="field-label">{t.admin.password}</label>
-            <input id="password" type="password" autoComplete="current-password" required value={password} onChange={(e) => setPassword(e.target.value)} className="input ltr" dir="ltr" />
           </div>
           {message && (
             <p className="field-error" role="alert">
