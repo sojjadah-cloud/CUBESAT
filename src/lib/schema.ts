@@ -1,3 +1,6 @@
+// PostgreSQL schema, applied idempotently on every start.
+// Kept in a module (not a .sql file) so serverless bundles always include it.
+export const SCHEMA_SQL = `
 -- MTC CubeSat recruitment platform schema (PostgreSQL).
 -- Idempotent: executed on every server start.
 
@@ -103,3 +106,4 @@ CREATE TABLE IF NOT EXISTS audit_logs (
   created_at  TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 CREATE INDEX IF NOT EXISTS audit_logs_created_idx ON audit_logs (created_at DESC);
+`;

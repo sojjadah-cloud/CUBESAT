@@ -31,7 +31,7 @@ With no `DATABASE_URL`, data is stored in `.data/pglite`. Only one process at a 
 
 ## Production setup
 
-1. **PostgreSQL.** Set `DATABASE_URL` (and `DATABASE_SSL=true` if required). The schema in `db/schema.sql` is idempotent and is applied automatically on start.
+1. **PostgreSQL.** Set `DATABASE_URL` (and `DATABASE_SSL=true` if required). The schema in `src/lib/schema.ts` is idempotent and is applied automatically on start.
 2. **Secrets.** Keep `.env` on the server only. No credentials are ever sent to the browser.
 3. **Storage.** Point `UPLOAD_DIR` at a persistent, backed-up directory that the web server does **not** serve statically. To use object storage (S3, Azure Blob), replace the four functions in `src/lib/files.ts`.
 4. **Admins.** On the server, run:
@@ -46,6 +46,15 @@ With no `DATABASE_URL`, data is stored in `.data/pglite`. Only one process at a 
 ```bash
 npm run build && npm start
 ```
+
+## Deploying on Netlify
+
+1. **Database.** In the Netlify site, open *Extensions* and enable **Netlify DB** (Neon). It sets `NETLIFY_DATABASE_URL` for the site, and the tables are created on the first request. (Any other PostgreSQL works too: set `DATABASE_URL`.)
+2. **Uploads** go to Netlify Blobs automatically. No setup is needed.
+3. **Admins.** In *Site configuration → Environment variables*, add `ADMIN_EMAILS` with the admin emails, separated by commas. Each one becomes an admin the first time it signs in.
+4. Redeploy (*Deploys → Trigger deploy*).
+
+Without a database the site refuses to save rather than losing data, because Netlify functions don't keep files on disk. `npm run retention:purge` works with the local disk only; on Netlify, delete old applications from the portal.
 
 ## Institutional configuration
 
@@ -70,7 +79,6 @@ Team content (names, descriptions, responsibilities, skills) is in `src/lib/team
 
 ```
 config/institution.json        Levels, departments, pathways (edit this)
-db/schema.sql                  PostgreSQL schema
 scripts/                       admin:create, retention:purge
 src/app/                       Pages and API route handlers
 src/components/wizard/         Application wizard and its steps

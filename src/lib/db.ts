@@ -1,9 +1,10 @@
 import fs from "node:fs";
 import path from "node:path";
+import { SCHEMA_SQL } from "./schema";
 
 /**
- * Minimal database layer. Uses a real PostgreSQL server when DATABASE_URL is
- * set; otherwise falls back to an embedded PostgreSQL (PGlite) stored under
+ * Minimal database layer. Uses a real PostgreSQL server when DATABASE_URL (or
+ * Netlify's NETLIFY_DATABASE_URL) is set; otherwise falls back to an embedded PostgreSQL (PGlite) stored under
  * .data/ so the platform runs locally without installing a database server.
  * All queries are parameterised.
  */
@@ -85,11 +86,18 @@ async function createPgliteDriver(): Promise<Driver> {
   };
 }
 
+/** True on serverless hosts (Netlify, AWS Lambda), where the local disk is not kept between requests. */
+export const isServerless = () =>
+  process.env.NETLIFY === "true" || Boolean(process.env.NETLIFY_BLOBS_CONTEXT) || Boolean(process.env.AWS_LAMBDA_FUNCTION_NAME);
+
 async function init(): Promise<Driver> {
-  const url = process.env.DATABASE_URL;
+  // NETLIFY_DATABASE_URL is set automatically when Netlify DB (Neon) is enabled for the site.
+  const url = process.env.DATABASE_URL || process.env.NETLIFY_DATABASE_URL;
+  if (!url && isServerless()) {
+    throw new Error("No database configured. Enable Netlify DB for this site, or set DATABASE_URL to a PostgreSQL connection string.");
+  }
   const driver = url ? await createPgDriver(url) : await createPgliteDriver();
-  const schema = fs.readFileSync(path.join(process.cwd(), "db", "schema.sql"), "utf8");
-  await driver.exec(schema);
+  await driver.exec(SCHEMA_SQL);
   return driver;
 }
 

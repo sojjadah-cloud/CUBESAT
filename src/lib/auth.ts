@@ -19,11 +19,28 @@ export interface AdminUser {
  * email opens a session. Accounts are created with `npm run admin:create`.
  */
 export async function findActiveAdmin(email: string): Promise<AdminUser | null> {
+  const normalised = email.trim().toLowerCase();
+  const user = await queryOne<AdminUser & { active: boolean }>(
+    `SELECT id, email, name, role, active FROM admin_users WHERE email = $1`,
+    [normalised],
+  );
+  if (user) return user.active ? { id: user.id, email: user.email, name: user.name, role: user.role } : null;
+  // ADMIN_EMAILS (comma-separated, e.g. set in Netlify's environment variables) creates
+  // admin accounts on first sign-in, for hosts where `npm run admin:create` can't be run.
+  if (!adminEmailsFromEnv().includes(normalised)) return null;
   return queryOne<AdminUser>(
-    `SELECT id, email, name, role FROM admin_users WHERE email = $1 AND active`,
-    [email.trim().toLowerCase()],
+    `INSERT INTO admin_users (email, name, password_hash, role) VALUES ($1, $2, '!', 'admin')
+     ON CONFLICT (email) DO UPDATE SET email = EXCLUDED.email
+     RETURNING id, email, name, role`,
+    [normalised, normalised.split("@")[0]],
   );
 }
+
+const adminEmailsFromEnv = () =>
+  (process.env.ADMIN_EMAILS ?? "")
+    .split(",")
+    .map((e) => e.trim().toLowerCase())
+    .filter(Boolean);
 
 export async function createSession(user: AdminUser, ip: string, userAgent: string | null) {
   const token = randomToken();

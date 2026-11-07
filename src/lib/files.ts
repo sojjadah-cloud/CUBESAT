@@ -1,12 +1,12 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import crypto from "node:crypto";
+import { isServerless } from "@/lib/db";
 
 /**
- * Private file storage. Files live outside /public on the server's disk
- * (UPLOAD_DIR) under random names and are served only through authorised
- * route handlers. Swap these functions for an object-storage client (S3,
- * Azure Blob, …) in production if preferred.
+ * Private file storage. Files are stored under random names, either on the
+ * server's disk outside /public (UPLOAD_DIR) or in Netlify Blobs, and are
+ * served only through authorised route handlers.
  */
 
 export const LIMITS = {
@@ -35,6 +35,17 @@ export const allowedFor = (kind: FileKind, mime: string) =>
 
 export const maxBytes = (kind: FileKind) => (kind === "image" ? LIMITS.imageMb : LIMITS.cvMb) * 1024 * 1024;
 
+/**
+ * On Netlify (or with FILE_STORAGE=netlify) files go to a private Netlify Blobs
+ * store, because serverless functions don't keep their local disk.
+ */
+const useBlobs = () => process.env.FILE_STORAGE === "netlify" || isServerless();
+
+async function blobStore() {
+  const { getStore } = await import("@netlify/blobs");
+  return getStore({ name: "uploads", consistency: "strong" });
+}
+
 export async function storeFile(buf: Buffer, ext: string): Promise<string> {
   const now = new Date();
   const key = path.posix.join(
@@ -42,6 +53,11 @@ export async function storeFile(buf: Buffer, ext: string): Promise<string> {
     String(now.getUTCMonth() + 1).padStart(2, "0"),
     `${crypto.randomUUID()}.${ext}`,
   );
+  if (useBlobs()) {
+    const bytes = new Uint8Array(buf);
+    await (await blobStore()).set(key, bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength));
+    return key;
+  }
   const full = path.join(root(), key);
   await fs.mkdir(path.dirname(full), { recursive: true });
   await fs.writeFile(full, buf, { flag: "wx" });
@@ -55,9 +71,20 @@ function resolveKey(key: string) {
   return full;
 }
 
-export const readFile = (key: string) => fs.readFile(resolveKey(key));
+export async function readFile(key: string): Promise<Buffer> {
+  if (useBlobs()) {
+    const data = await (await blobStore()).get(key, { type: "arrayBuffer" });
+    if (!data) throw new Error("File not found");
+    return Buffer.from(data);
+  }
+  return fs.readFile(resolveKey(key));
+}
 
 export async function deleteFile(key: string) {
+  if (useBlobs()) {
+    await (await blobStore()).delete(key);
+    return;
+  }
   await fs.rm(resolveKey(key), { force: true });
 }
 
