@@ -236,12 +236,12 @@ export function ChoiceGroup<T extends string>({
 
 export function StepHeading({ eyebrow, title, lead }: { eyebrow?: string; title: string; lead?: string }) {
   return (
-    <div className="mb-8">
+    <div className="mb-8 text-center lg:text-start">
       {eyebrow && <p className="eyebrow">{eyebrow}</p>}
       <h1 id="step-heading" tabIndex={-1} className="mt-2 text-[24px] font-bold leading-snug outline-none sm:text-[30px]">
         {title}
       </h1>
-      {lead && <p className="mt-3 max-w-[68ch] text-ink-muted">{lead}</p>}
+      {lead && <p className="mx-auto mt-3 max-w-[68ch] text-ink-muted lg:mx-0">{lead}</p>}
     </div>
   );
 }

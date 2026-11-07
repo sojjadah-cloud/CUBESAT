@@ -13,7 +13,7 @@ export function TeamsIndexPage() {
       {(["technical", "non_technical"] as Category[]).map((cat) => {
         const info = cat === "technical" ? t.landing.technical : t.landing.nonTechnical;
         return (
-          <section key={cat} className="container-page pt-8" aria-labelledby={`${cat}-h`}>
+          <section key={cat} className="container-page pt-8 text-center lg:text-start" aria-labelledby={`${cat}-h`}>
             <h2 id={`${cat}-h`} className="text-[20px] font-bold">
               {info.title}
             </h2>

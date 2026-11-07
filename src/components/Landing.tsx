@@ -15,11 +15,11 @@ export function Landing() {
       <section className="relative overflow-hidden">
         <div aria-hidden="true" className="starfield absolute inset-0 opacity-60" />
         <div className="container-page relative grid items-center gap-10 py-14 sm:py-20 lg:grid-cols-[1.1fr_.9fr] lg:gap-14 lg:py-24">
-          <div className="animate-fade-up">
+          <div className="animate-fade-up text-center lg:text-start">
             <h1 className="text-[34px] font-bold leading-[1.15] sm:text-[46px] lg:text-[54px]">{t.landing.title}</h1>
             <p className="mt-4 font-display text-[20px] font-semibold text-orbit-ink sm:text-[22px]">{t.common.tagline}</p>
-            <p className="mt-6 max-w-[60ch] text-ink-muted">{t.landing.lead}</p>
-            <Link href="/about" className="btn-primary mt-8 min-h-[52px] px-8 text-[16px]">
+            <p className="mx-auto mt-6 max-w-[60ch] text-ink-muted lg:mx-0">{t.landing.lead}</p>
+            <Link href="/about" className="btn-primary mt-8 min-h-[52px] w-full max-w-[320px] px-8 text-[16px] lg:w-auto">
               {t.common.start}
               <Arrow className="h-4 w-4" aria-hidden="true" />
             </Link>

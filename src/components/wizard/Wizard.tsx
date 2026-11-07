@@ -53,7 +53,7 @@ function Progress({ index, maxIndex, onJump }: { index: number; maxIndex: number
     <nav aria-label={t.wizard.progress} className="border-b border-line/70 bg-space-950/60 no-print">
       <div className="container-page py-3">
         {/* Compact (mobile) */}
-        <div className="md:hidden">
+        <div className="lg:hidden">
           <div className="flex items-baseline justify-between text-[13px]">
             <span className="font-semibold text-ink">{t.steps[STEPS[index]]}</span>
             <span className="text-ink-muted">{t.wizard.stepOf(index + 1, STEPS.length)}</span>
@@ -63,7 +63,7 @@ function Progress({ index, maxIndex, onJump }: { index: number; maxIndex: number
           </div>
         </div>
         {/* Full (desktop) */}
-        <ol className="hidden items-center gap-1 md:flex">
+        <ol className="hidden items-center gap-1 lg:flex">
           {STEPS.map((s, i) => {
             const done = i < index || (i <= maxIndex && i !== index);
             const current = i === index;

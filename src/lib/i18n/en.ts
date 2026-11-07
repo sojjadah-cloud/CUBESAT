@@ -31,6 +31,8 @@ export const en = {
     learnMore: "Learn more",
     next: "Next",
     start: "Start",
+    introStep: (n: number, total: number) => `Introduction ${n} of ${total}`,
+    formNext: "The application form starts next.",
   },
   nav: { home: "Home", about: "About the Society", teams: "Teams", process: "How to apply", apply: "Apply", menu: "Main navigation" },
   landing: {

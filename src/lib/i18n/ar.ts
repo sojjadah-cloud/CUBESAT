@@ -33,6 +33,8 @@ export const ar: Dictionary = {
     learnMore: "اعرف المزيد",
     next: "التالي",
     start: "ابدأ",
+    introStep: (n: number, total: number) => `صفحة تعريفية ${n} من ${total}`,
+    formNext: "بعد هذه الصفحة يبدأ نموذج التقديم.",
   },
   nav: { home: "الرئيسية", about: "عن الجمعية", teams: "الفرق", process: "خطوات التقديم", apply: "قدّم الآن", menu: "القائمة الرئيسية" },
   landing: {

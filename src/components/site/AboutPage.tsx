@@ -9,8 +9,8 @@ export function AboutPage() {
   return (
     <SiteShell step={1}>
       <PageTitle title={t.nav.about} />
-      <section className="container-page pt-6">
-        <p className="max-w-[68ch] text-ink-muted">{t.landing.lead2}</p>
+      <section className="container-page pt-6 text-center lg:text-start">
+        <p className="mx-auto max-w-[68ch] text-ink-muted lg:mx-0">{t.landing.lead2}</p>
         <h2 className="mt-10 text-[20px] font-bold">{t.landing.objectivesTitle}</h2>
         <ol className="mt-4 grid gap-px overflow-hidden rounded-card border border-line bg-line sm:grid-cols-2">
           {t.landing.objectives.map((o, i) => (
