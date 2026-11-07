@@ -14,11 +14,15 @@ export function LoginForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
-  const [error, setError] = useState<"invalid" | "rate" | "network" | null>(null);
+  const [error, setError] = useState<"invalid" | "rate" | "network" | "missing" | null>(null);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (busy) return;
+    if (!email.trim() || !password) {
+      setError("missing");
+      return;
+    }
     setBusy(true);
     setError(null);
     try {
@@ -40,7 +44,7 @@ export function LoginForm() {
     }
   };
 
-  const message = error === "invalid" ? t.admin.invalidLogin : error === "rate" ? t.review.rateLimited : error ? t.errors.network : null;
+  const message = error === "missing" ? t.admin.missingLogin : error === "invalid" ? t.admin.invalidLogin : error === "rate" ? t.review.rateLimited : error ? t.errors.network : null;
 
   return (
     <main id="main" className="relative grid min-h-dvh place-items-center px-4 py-12">
@@ -75,7 +79,7 @@ export function LoginForm() {
               {message}
             </p>
           )}
-          <button type="submit" className="btn-primary w-full" disabled={busy || !email || !password}>
+          <button type="submit" className="btn-primary w-full" disabled={busy}>
             {busy && <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />}
             {busy ? t.admin.signingIn : t.admin.signIn}
           </button>

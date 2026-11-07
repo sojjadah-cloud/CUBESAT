@@ -341,6 +341,7 @@ export const ar: Dictionary = {
     password: "كلمة المرور",
     signingIn: "جارٍ تسجيل الدخول…",
     invalidLogin: "البريد الإلكتروني أو كلمة المرور غير صحيحة.",
+    missingLogin: "أدخل البريد الإلكتروني وكلمة المرور.",
     signOut: "تسجيل الخروج",
     overview: "نظرة عامة",
     applications: "الطلبات",

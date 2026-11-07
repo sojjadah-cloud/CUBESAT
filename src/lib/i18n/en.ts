@@ -339,6 +339,7 @@ export const en = {
     password: "Password",
     signingIn: "Signing in…",
     invalidLogin: "Incorrect email or password.",
+    missingLogin: "Enter both your email and password.",
     signOut: "Sign out",
     overview: "Overview",
     applications: "Applications",
