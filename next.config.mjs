@@ -8,7 +8,7 @@ const securityHeaders = [
 
 const nextConfig = {
   poweredByHeader: false,
-  serverExternalPackages: ["@electric-sql/pglite", "pg", "bcryptjs"],
+  serverExternalPackages: ["@electric-sql/pglite", "pg", "bcryptjs", "@netlify/database"],
   async headers() {
     return [{ source: "/:path*", headers: securityHeaders }];
   },

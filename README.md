@@ -49,7 +49,7 @@ npm run build && npm start
 
 ## Deploying on Netlify
 
-1. **Database.** In the Netlify site, open *Extensions* and enable **Netlify DB** (Neon). It sets `NETLIFY_DATABASE_URL` for the site, and the tables are created on the first request. (Any other PostgreSQL works too: set `DATABASE_URL`.)
+1. **Database.** Netlify Database is created automatically on deploy, because `@netlify/database` is a dependency. If it isn't, open *Data & Storage → Database* and choose *Create a database manually*. The app reads `NETLIFY_DB_URL` and creates its tables on the first request. Any other PostgreSQL works too: set `DATABASE_URL`.
 2. **Uploads** go to Netlify Blobs automatically. No setup is needed.
 3. **Admins.** In *Site configuration → Environment variables*, add `ADMIN_EMAILS` with the admin emails, separated by commas. Each one becomes an admin the first time it signs in.
 4. Redeploy (*Deploys → Trigger deploy*).

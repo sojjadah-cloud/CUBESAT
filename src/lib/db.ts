@@ -4,7 +4,7 @@ import { SCHEMA_SQL } from "./schema";
 
 /**
  * Minimal database layer. Uses a real PostgreSQL server when DATABASE_URL (or
- * Netlify's NETLIFY_DATABASE_URL) is set; otherwise falls back to an embedded PostgreSQL (PGlite) stored under
+ * Netlify Database's NETLIFY_DB_URL) is set; otherwise falls back to an embedded PostgreSQL (PGlite) stored under
  * .data/ so the platform runs locally without installing a database server.
  * All queries are parameterised.
  */
@@ -86,15 +86,31 @@ async function createPgliteDriver(): Promise<Driver> {
   };
 }
 
+/**
+ * Netlify Database: provisioned automatically on deploy because @netlify/database
+ * is a dependency; its connection string is exposed as NETLIFY_DB_URL.
+ * NETLIFY_DATABASE_URL is the older Netlify DB extension's variable.
+ */
+async function netlifyDatabaseUrl(): Promise<string | undefined> {
+  if (process.env.NETLIFY_DB_URL) return process.env.NETLIFY_DB_URL;
+  if (process.env.NETLIFY_DATABASE_URL) return process.env.NETLIFY_DATABASE_URL;
+  if (!isServerless()) return undefined;
+  try {
+    const { getConnectionString } = await import("@netlify/database");
+    return getConnectionString();
+  } catch {
+    return undefined;
+  }
+}
+
 /** True on serverless hosts (Netlify, AWS Lambda), where the local disk is not kept between requests. */
 export const isServerless = () =>
   process.env.NETLIFY === "true" || Boolean(process.env.NETLIFY_BLOBS_CONTEXT) || Boolean(process.env.AWS_LAMBDA_FUNCTION_NAME);
 
 async function init(): Promise<Driver> {
-  // NETLIFY_DATABASE_URL is set automatically when Netlify DB (Neon) is enabled for the site.
-  const url = process.env.DATABASE_URL || process.env.NETLIFY_DATABASE_URL;
+  const url = process.env.DATABASE_URL || (await netlifyDatabaseUrl());
   if (!url && isServerless()) {
-    throw new Error("No database configured. Enable Netlify DB for this site, or set DATABASE_URL to a PostgreSQL connection string.");
+    throw new Error("No database configured. Create the Netlify Database for this site, or set DATABASE_URL to a PostgreSQL connection string.");
   }
   const driver = url ? await createPgDriver(url) : await createPgliteDriver();
   await driver.exec(SCHEMA_SQL);
