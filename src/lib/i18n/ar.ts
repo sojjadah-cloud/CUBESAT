@@ -143,6 +143,7 @@ export const ar: Dictionary = {
     activities: "أمثلة على الأنشطة",
     skills: "المهارات والبرامج ذات الصلة",
     selectedBadge: "تم الاختيار",
+    applied: "تم التقديم سابقًا",
     openToAll: "الفرق غير التقنية متاحة لطلبة جميع التخصصات الأكاديمية.",
   },
   student: {
@@ -274,6 +275,8 @@ export const ar: Dictionary = {
     errSize: (mb: number) => `حجم الملف أكبر من ${mb} ميجابايت.`,
     errCount: (max: number) => `يمكنك رفع ${max} صور كحد أقصى.`,
     errUpload: "تعذّر رفع الملف. يرجى المحاولة مرة أخرى.",
+    linkedinTitle: "رابط LinkedIn",
+    linkedinPh: "linkedin.com/in/your-name",
   },
   review: {
     title: "مراجعة الطلب",
@@ -296,7 +299,7 @@ export const ar: Dictionary = {
     submit: "إرسال الطلب",
     submitting: "جارٍ الإرسال…",
     submitError: "تعذّر إرسال طلبك. إجاباتك محفوظة — يرجى المحاولة مرة أخرى.",
-    duplicate: "تم تقديم طلب سابق بهذا الرقم الجامعي. يرجى التواصل مع الفريق المنظّم إذا رغبت في إجراء تعديلات.",
+    duplicate: "سبق أن قدّمت على هذا الفريق. ارجع واختر فريقًا آخر.",
     rateLimited: "عدد المحاولات كبير. يرجى الانتظار دقيقة ثم المحاولة مرة أخرى.",
   },
   success: {
@@ -308,6 +311,9 @@ export const ar: Dictionary = {
     copied: "تم النسخ",
     home: "العودة إلى الصفحة الرئيسية",
     print: "طباعة التأكيد",
+    another: "هل تريد الانضمام لفريق آخر؟",
+    anotherHint: "بياناتك محفوظة — تختار الفريق فقط ثم تراجع وترسل.",
+    noThanks: "لا، شكرًا",
   },
   errors: {
     required: "هذا الحقل مطلوب.",
@@ -323,6 +329,7 @@ export const ar: Dictionary = {
     consent: "يرجى تأكيد الإقرار لإرسال الطلب.",
     invalid: "القيمة غير صحيحة.",
     entries: "أضف مشاركة واحدة على الأقل، أو اختر «لا».",
+    linkedin: "أدخل رابط حسابك في LinkedIn، مثل linkedin.com/in/your-name.",
     network: "مشكلة في الاتصال. يرجى التحقق من الإنترنت والمحاولة مرة أخرى.",
   },
   status: {

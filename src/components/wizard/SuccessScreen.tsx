@@ -2,10 +2,11 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Check, Copy, Printer } from "lucide-react";
+import { Check, Copy, Cpu, Megaphone, Printer } from "lucide-react";
 import { useLocale } from "@/components/LocaleProvider";
+import type { Category } from "@/lib/teams";
 
-export function SuccessScreen({ reference }: { reference: string }) {
+export function SuccessScreen({ reference, onAnother }: { reference: string; onAnother: (c: Category) => void }) {
   const { t } = useLocale();
   const s = t.success;
   const [copied, setCopied] = useState(false);
@@ -43,11 +44,28 @@ export function SuccessScreen({ reference }: { reference: string }) {
         </div>
       </div>
 
-      <div className="no-print mt-8 flex flex-col justify-center gap-3 sm:flex-row">
-        <Link href="/" className="btn-primary">
-          {s.home}
+      <section className="no-print mx-auto mt-8 max-w-[520px] rounded-card border border-orbit/50 bg-orbit/[0.07] p-5 sm:p-6" aria-labelledby="another-h">
+        <h2 id="another-h" className="text-[18px] font-bold">
+          {s.another}
+        </h2>
+        <p className="mt-1.5 text-[14px] text-ink-muted">{s.anotherHint}</p>
+        <div className="mt-5 grid gap-3 sm:grid-cols-2">
+          <button type="button" onClick={() => onAnother("technical")} className="btn-primary">
+            <Cpu className="h-4 w-4" aria-hidden="true" />
+            {t.category.technical.title}
+          </button>
+          <button type="button" onClick={() => onAnother("non_technical")} className="btn-primary">
+            <Megaphone className="h-4 w-4" aria-hidden="true" />
+            {t.category.nonTechnical.title}
+          </button>
+        </div>
+      </section>
+
+      <div className="no-print mt-6 flex flex-col justify-center gap-3 sm:flex-row">
+        <Link href="/" className="btn-secondary">
+          {s.noThanks}
         </Link>
-        <button type="button" onClick={() => window.print()} className="btn-secondary">
+        <button type="button" onClick={() => window.print()} className="btn-ghost">
           <Printer className="h-4 w-4" aria-hidden="true" />
           {s.print}
         </button>

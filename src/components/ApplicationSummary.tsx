@@ -82,6 +82,37 @@ export function ApplicationSummary({
   const none = <span className="text-ink-faint">{r.noneProvided}</span>;
   const val = (v: string | null | undefined) => (v && v.trim() ? v : none);
 
+  const fileList = (list: SummaryFile[]) =>
+    list.length ? (
+      <ul className="space-y-1">
+        {list.map((file) => (
+          <li key={file.id} className="truncate" dir="auto">
+            {file.href ? (
+              <a href={file.href} target="_blank" rel="noopener noreferrer" className="text-signal underline underline-offset-4">
+                {file.name}
+              </a>
+            ) : (
+              file.name
+            )}
+          </li>
+        ))}
+      </ul>
+    ) : (
+      none
+    );
+
+  // Only a validated linkedin.com address is turned into a link.
+  const linkedinHref = (() => {
+    const v = data.linkedin?.trim();
+    if (!v) return null;
+    try {
+      const u = new URL(/^https?:\/\//i.test(v) ? v : `https://${v}`);
+      return /(^|\.)linkedin\.com$/i.test(u.hostname) ? u.href : null;
+    } catch {
+      return null;
+    }
+  })();
+
   const entryRows = (key: ExperienceKey, raw: Record<string, string>): [string, React.ReactNode][] => {
     // Older drafts used per-type fields; fall back to them so nothing is lost.
     const name = raw.name || raw.title || "";
@@ -173,26 +204,22 @@ export function ApplicationSummary({
       </Section>
 
       <Section title={r.attachments} step="attachments" onEdit={onEdit} editLabel={t.common.edit}>
-        {files.length ? (
-          <ul className="space-y-1.5 text-[14px]">
-            {files.map((file) => (
-              <li key={file.id} className="flex items-center justify-between gap-3">
-                {file.href ? (
-                  <a href={file.href} target="_blank" rel="noopener noreferrer" className="truncate text-signal underline-offset-4 hover:underline" dir="auto">
-                    {file.name}
-                  </a>
-                ) : (
-                  <span className="truncate" dir="auto">{file.name}</span>
-                )}
-                <span className="shrink-0 text-[12px] text-ink-faint">
-                  {file.kind === "cv" ? t.attachments.cvTitle : t.attachments.imagesTitle}
-                </span>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p className="text-[13px] text-ink-faint">{r.none}</p>
-        )}
+        <Rows
+          rows={[
+            [t.attachments.imagesTitle, fileList(files.filter((f) => f.kind === "image"))],
+            [t.attachments.cvTitle, fileList(files.filter((f) => f.kind === "cv"))],
+            [
+              t.attachments.linkedinTitle,
+              linkedinHref ? (
+                <a key="li" href={linkedinHref} target="_blank" rel="noopener noreferrer" className="text-signal underline underline-offset-4" dir="ltr">
+                  {data.linkedin.trim()}
+                </a>
+              ) : (
+                none
+              ),
+            ],
+          ]}
+        />
       </Section>
     </div>
   );

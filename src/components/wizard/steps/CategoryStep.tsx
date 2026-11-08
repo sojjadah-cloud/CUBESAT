@@ -62,7 +62,7 @@ export function CategoryStep() {
               <div className="mt-5 flex flex-wrap gap-1.5 border-t border-line/70 pt-4">
                 {teams.map((team) => (
                   <span key={team.id} className="rounded-md bg-space-950/50 px-2 py-1 text-[12px] text-ink-muted">
-                    {locale === "en" && team.acronym ? team.acronym : team.name[locale]}
+                    {locale === "en" && team.acronym ? team.acronym : team.acronym ? `${team.name[locale]} · ${team.acronym}` : team.name[locale]}
                   </span>
                 ))}
               </div>

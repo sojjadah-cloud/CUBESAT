@@ -45,6 +45,8 @@ export interface ApplicationData {
   motivationContribute: string;
   motivationLearn: string;
   weeklyHours: string;
+  /** Optional LinkedIn profile link (attachments step). */
+  linkedin: string;
   consent: boolean;
 }
 
@@ -69,6 +71,7 @@ export const emptyApplication = (): ApplicationData => ({
   motivationContribute: "",
   motivationLearn: "",
   weeklyHours: "",
+  linkedin: "",
   consent: false,
 });
 
@@ -81,7 +84,7 @@ export const MAX_ENTRIES = 10;
 /** Error codes; translated by the UI via dictionary.errors. */
 export type ErrorCode =
   | "required" | "choose" | "email" | "emailDomain" | "studentId" | "phone" | "year" | "url"
-  | "tooLong" | "tooShort" | "consent" | "invalid" | "entries";
+  | "tooLong" | "tooShort" | "consent" | "linkedin" | "invalid" | "entries";
 
 export type FieldErrors = Record<string, ErrorCode>;
 
@@ -162,13 +165,29 @@ export function buildSchemas(rules: InstitutionRules) {
     skillsOther: opt(300),
     motivationWhy: req(1500).refine((v) => v.trim().length >= 20, "tooShort"),
     motivationContribute: req(1500),
-    motivationLearn: opt(1500),
+    motivationLearn: req(1500),
     weeklyHours: z.string().refine((v) => WEEKLY_HOURS.some((h) => h.id === v), "choose"),
+  });
+
+  const attachments = z.object({
+    linkedin: z
+      .string()
+      .trim()
+      .max(300, "tooLong")
+      .refine((v) => {
+        if (!v) return true;
+        try {
+          const u = new URL(/^https?:\/\//i.test(v) ? v : `https://${v}`);
+          return /(^|\.)linkedin\.com$/i.test(u.hostname);
+        } catch {
+          return false;
+        }
+      }, "linkedin"),
   });
 
   const review = z.object({ consent: z.literal(true, { errorMap: () => ({ message: "consent" }) }) });
 
-  return { category, teams, student, experience, motivation, review };
+  return { category, teams, student, experience, motivation, attachments, review };
 }
 
 /** "student" = basic information; "experience" = skills, experience and motivation. */
@@ -197,7 +216,7 @@ export function validateStep(step: StepId, data: ApplicationData, rules: Institu
       const b = collect(s.experience.safeParse(data));
       return { ...b, ...a };
     }
-    case "attachments": return {};
+    case "attachments": return collect(s.attachments.safeParse(data));
     case "review": return collect(s.review.safeParse(data));
   }
 }
@@ -210,11 +229,12 @@ export function validateApplication(input: unknown, rules: InstitutionRules) {
     .and(s.student)
     .and(s.experience)
     .and(s.motivation)
+    .and(s.attachments)
     .and(s.review);
   const result = full.safeParse(input);
   if (result.success) return { ok: true as const, data: result.data };
   const errors = collect(result);
-  const order: StepId[] = ["category", "teams", "student", "experience", "review"];
+  const order: StepId[] = ["category", "teams", "student", "experience", "attachments", "review"];
   const raw = (input ?? {}) as ApplicationData;
   const step = order.find((st) => Object.keys(validateStep(st, raw, rules)).length > 0) ?? "review";
   return { ok: false as const, errors, step };

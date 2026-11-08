@@ -300,9 +300,15 @@ export const TEAMS: Team[] = [
 
 export const teamById = (id: string | null | undefined) => TEAMS.find((t) => t.id === id);
 export const teamsFor = (category: Category) => TEAMS.filter((t) => t.category === category);
+/** English label shown beside the team name: the acronym (e.g. EPS) or, if none, the English name. */
+export const teamTag = (team: Team, locale: Locale) => (locale === "ar" ? team.acronym ?? team.name.en : team.acronym);
+
+/** Team name as plain text, with its English tag in brackets, e.g. "نظام الطاقة الكهربائية (EPS)". */
 export const teamName = (id: string | null | undefined, locale: Locale) => {
   const t = teamById(id);
-  return t ? t.name[locale] : id ?? "";
+  if (!t) return id ?? "";
+  const tag = teamTag(t, locale);
+  return tag ? `${t.name[locale]} (${tag})` : t.name[locale];
 };
 
 export interface Skill {

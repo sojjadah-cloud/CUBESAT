@@ -45,7 +45,7 @@ CREATE TABLE IF NOT EXISTS applications (
   secondary_team        TEXT,
   full_name             TEXT NOT NULL,
   student_id            TEXT NOT NULL,
-  student_id_norm       TEXT NOT NULL UNIQUE,
+  student_id_norm       TEXT NOT NULL,
   academic_level        TEXT NOT NULL,
   department            TEXT NOT NULL,
   department_other      TEXT,
@@ -53,6 +53,7 @@ CREATE TABLE IF NOT EXISTS applications (
   specialisation_other  TEXT,
   phone                 TEXT NOT NULL,
   email                 TEXT,
+  linkedin              TEXT,
   experience            JSONB NOT NULL,
   skills                JSONB NOT NULL DEFAULT '[]'::jsonb,
   skills_other          TEXT,
@@ -67,6 +68,10 @@ CREATE TABLE IF NOT EXISTS applications (
 );
 -- Email is no longer collected (the student ID identifies applicants).
 ALTER TABLE applications ALTER COLUMN email DROP NOT NULL;
+ALTER TABLE applications ADD COLUMN IF NOT EXISTS linkedin TEXT;
+-- A student may apply to several teams, but only once per team.
+ALTER TABLE applications DROP CONSTRAINT IF EXISTS applications_student_id_norm_key;
+CREATE UNIQUE INDEX IF NOT EXISTS applications_student_team_idx ON applications (student_id_norm, primary_team);
 CREATE INDEX IF NOT EXISTS applications_status_idx ON applications (status);
 CREATE INDEX IF NOT EXISTS applications_primary_team_idx ON applications (primary_team);
 CREATE INDEX IF NOT EXISTS applications_created_idx ON applications (created_at DESC);

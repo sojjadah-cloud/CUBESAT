@@ -3,7 +3,7 @@
 import { useRef, useState } from "react";
 import { AlertCircle, FileText, ImagePlus, Lock, RefreshCw, Trash2, Upload } from "lucide-react";
 import { useLocale } from "@/components/LocaleProvider";
-import { StepHeading } from "@/components/ui/fields";
+import { StepHeading, TextField } from "@/components/ui/fields";
 import { useWizard } from "@/components/wizard/context";
 import type { UploadedFile } from "@/lib/application";
 import { formatSize } from "@/lib/format";
@@ -145,7 +145,7 @@ function ProgressRow({ p }: { p: Pending }) {
 
 export function AttachmentsStep() {
   const { t } = useLocale();
-  const { files, setFiles, limits } = useWizard();
+  const { files, setFiles, limits, data, update, err, touch } = useWizard();
   const a = t.attachments;
   const [pending, setPending] = useState<Pending[]>([]);
 
@@ -299,6 +299,24 @@ export function AttachmentsStep() {
             {pending.filter((p) => p.kind === "cv").map((p) => <ProgressRow key={p.key} p={p} />)}
           </ul>
         )}
+      </section>
+
+      <section className="panel mt-5 p-5 sm:p-7">
+        <TextField
+          name="linkedin"
+          label={a.linkedinTitle}
+          optional
+          value={data.linkedin}
+          onChange={(v) => update({ linkedin: v })}
+          onBlur={() => touch("linkedin")}
+          error={err("linkedin")}
+          placeholder={a.linkedinPh}
+          type="url"
+          inputMode="url"
+          autoComplete="url"
+          ltr
+          maxLength={300}
+        />
       </section>
 
       <p className="mt-5 flex items-start gap-2.5 text-[13px] text-ink-muted">

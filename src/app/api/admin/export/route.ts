@@ -28,7 +28,7 @@ export async function GET(req: Request) {
     "Reference", "Submitted", "Status", "Category", "Team",
     "Full name", "Student ID", "Academic level", "Department", "Specialisation", "Mobile",
     "Workshops", "Courses", "Competitions", "Projects", "Skills", "Other skills",
-    "Why join", "Expected contribution", "Wants to learn", "Weekly hours", "Attachments", "Form language",
+    "Why join", "Expected contribution", "Wants to learn", "Weekly hours", "LinkedIn", "Attachments", "Form language",
   ];
   const lines = rows.map((r) => {
     const exp = Object.fromEntries(
@@ -61,6 +61,7 @@ export async function GET(req: Request) {
       r.motivation_contribute,
       r.motivation_learn ?? "",
       optionLabel(WEEKLY_HOURS, r.weekly_hours, L),
+      r.linkedin ?? "",
       r.file_count,
       r.locale,
     ].map(cell).join(",");

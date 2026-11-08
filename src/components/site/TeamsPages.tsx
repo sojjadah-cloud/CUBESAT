@@ -2,7 +2,7 @@
 
 import { useLocale } from "@/components/LocaleProvider";
 import { NextButton, PageTitle, SiteShell } from "@/components/site/SiteShell";
-import { teamsFor, type Category } from "@/lib/teams";
+import { teamTag, teamsFor, type Category } from "@/lib/teams";
 
 export function TeamsIndexPage() {
   const { t, locale } = useLocale();
@@ -20,7 +20,14 @@ export function TeamsIndexPage() {
             <ul className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {teamsFor(cat).map((team) => (
                 <li key={team.id} className="rounded-card border border-line bg-white p-5">
-                  <h3 className="text-[16px] font-semibold">{team.name[locale]}</h3>
+                  <h3 className="text-[16px] font-semibold">
+                    {team.name[locale]}
+                    {teamTag(team, locale) && (
+                      <span className="ms-2 inline-block rounded-md border border-line px-1.5 py-0.5 align-middle text-[12px] font-semibold text-ink-muted" dir="ltr">
+                        {teamTag(team, locale)}
+                      </span>
+                    )}
+                  </h3>
                   <p className="mt-1.5 text-[14px] text-ink-muted">{team.description[locale]}</p>
                 </li>
               ))}

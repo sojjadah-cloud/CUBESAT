@@ -141,6 +141,7 @@ export const en = {
     activities: "Example activities",
     skills: "Relevant skills & software",
     selectedBadge: "Selected",
+    applied: "Already applied",
     openToAll: "Non-technical teams are open to students from every specialisation.",
   },
   student: {
@@ -272,6 +273,8 @@ export const en = {
     errSize: (mb: number) => `File is larger than ${mb} MB.`,
     errCount: (max: number) => `You can upload up to ${max} images.`,
     errUpload: "Upload failed. Please try again.",
+    linkedinTitle: "LinkedIn profile",
+    linkedinPh: "linkedin.com/in/your-name",
   },
   review: {
     title: "Review your application",
@@ -294,7 +297,7 @@ export const en = {
     submit: "Submit application",
     submitting: "Submitting…",
     submitError: "We couldn't submit your application. Your answers are safe — please try again.",
-    duplicate: "An application with this student ID has already been submitted. Please contact the organising team if you need to make changes.",
+    duplicate: "You have already applied to this team. Go back and choose a different team.",
     rateLimited: "Too many attempts. Please wait a minute and try again.",
   },
   success: {
@@ -306,6 +309,9 @@ export const en = {
     copied: "Copied",
     home: "Back to project page",
     print: "Print confirmation",
+    another: "Would you like to join another team too?",
+    anotherHint: "Your details are kept — you only choose the team and review.",
+    noThanks: "No, thanks",
   },
   errors: {
     required: "This field is required.",
@@ -321,6 +327,7 @@ export const en = {
     consent: "Please confirm to submit your application.",
     invalid: "This value isn't valid.",
     entries: "Add at least one entry, or choose “No”.",
+    linkedin: "Enter a LinkedIn profile link, e.g. linkedin.com/in/your-name.",
     network: "Connection problem. Please check your internet and try again.",
   },
   status: {

@@ -5,13 +5,14 @@ import { AlertCircle, Check, ChevronDown } from "lucide-react";
 import { useLocale } from "@/components/LocaleProvider";
 import { StepHeading } from "@/components/ui/fields";
 import { useWizard } from "@/components/wizard/context";
-import { skillById, teamsFor, type Team } from "@/lib/teams";
+import { skillById, teamTag, teamsFor, type Team } from "@/lib/teams";
 
 function TeamCard({ team }: { team: Team }) {
   const { t, locale } = useLocale();
-  const { data, update } = useWizard();
+  const { data, update, appliedTeams } = useWizard();
   const [open, setOpen] = useState(false);
   const selected = data.primaryTeam === team.id;
+  const applied = appliedTeams.includes(team.id);
   const detailsId = `team-${team.id}-details`;
 
   return (
@@ -26,7 +27,7 @@ function TeamCard({ team }: { team: Team }) {
           {team.name[locale]}
         </h2>
         <div className="flex shrink-0 items-center gap-1.5">
-          {locale === "en" && team.acronym && <span className="badge border border-line text-ink-muted">{team.acronym}</span>}
+          {teamTag(team, locale) && <span className="badge border border-line text-ink-muted" dir="ltr">{teamTag(team, locale)}</span>}
           {selected && <span className="badge bg-orbit text-navy">{t.teams.selectedBadge}</span>}
         </div>
       </div>
@@ -78,11 +79,12 @@ function TeamCard({ team }: { team: Team }) {
           type="button"
           role="radio"
           aria-checked={selected}
+          disabled={applied}
           onClick={() => update({ primaryTeam: team.id })}
           className={`btn btn-sm w-full ${selected ? "bg-orbit text-navy" : "border border-line bg-white text-ink hover:border-orbit"}`}
         >
-          {selected && <Check className="h-4 w-4" aria-hidden="true" />}
-          {selected ? t.teams.selectedBadge : t.teams.choose}
+          {(selected || applied) && <Check className="h-4 w-4" aria-hidden="true" />}
+          {applied ? t.teams.applied : selected ? t.teams.selectedBadge : t.teams.choose}
         </button>
       </div>
     </article>

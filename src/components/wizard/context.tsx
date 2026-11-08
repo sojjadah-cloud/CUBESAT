@@ -27,6 +27,7 @@ export interface WizardContextValue {
   goTo: (step: StepId) => void;
   notice: NoticeKey | null;
   setNotice: (n: NoticeKey | null) => void;
+  appliedTeams: string[];
 }
 
 export const WizardContext = createContext<WizardContextValue | null>(null);

@@ -112,7 +112,6 @@ export function MotivationSection() {
         <TextAreaField
           name="motivationLearn"
           label={m.learn}
-          optional
           value={data.motivationLearn}
           onChange={(v) => update({ motivationLearn: v })}
           onBlur={() => touch("motivationLearn")}

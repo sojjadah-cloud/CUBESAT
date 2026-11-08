@@ -23,6 +23,7 @@ import {
   type UploadedFile,
 } from "@/lib/application";
 import type { InstitutionRules } from "@/lib/institution";
+import type { Category } from "@/lib/teams";
 
 type SaveState = "idle" | "saving" | "saved" | "error";
 type SubmitError = "duplicate" | "rateLimited" | "submitError" | "network";
@@ -118,6 +119,8 @@ export function Wizard({ rules, limits }: { rules: InstitutionRules; limits: Lim
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<SubmitError | null>(null);
   const [reference, setReference] = useState<string | null>(null);
+  /** Teams already applied to in this visit; a student may apply to several teams, once each. */
+  const [appliedTeams, setAppliedTeams] = useState<string[]>([]);
 
   const submissionKey = useRef("");
   const interacted = useRef(false);
@@ -304,6 +307,7 @@ export function Wizard({ rules, limits }: { rules: InstitutionRules; limits: Lim
       const body = await res.json().catch(() => ({}));
       if (res.ok && body.reference) {
         dirty.current = false;
+        if (data.primaryTeam) setAppliedTeams((a) => [...a, data.primaryTeam!]);
         setReference(body.reference);
         window.history.replaceState(null, "", "/apply");
         return;
@@ -337,6 +341,22 @@ export function Wizard({ rules, limits }: { rules: InstitutionRules; limits: Lim
     goToIndex(0);
   };
 
+  /** Starts another application for a different team, reusing everything except the team and files. */
+  const applyAnother = (category: Category) => {
+    submissionKey.current = newKey();
+    interacted.current = true;
+    setData((d) => ({ ...d, category, primaryTeam: null, consent: false }));
+    setFiles([]);
+    setTouched(new Set());
+    setSubmitError(null);
+    setNotice(null);
+    setReference(null);
+    const last = STEPS.length - 1;
+    setMaxIndex(last);
+    maxRef.current = last;
+    goToIndex(STEPS.indexOf("teams"));
+  };
+
   const ctx: WizardContextValue = {
     data,
     update,
@@ -350,6 +370,7 @@ export function Wizard({ rules, limits }: { rules: InstitutionRules; limits: Lim
     goTo,
     notice,
     setNotice,
+    appliedTeams,
   };
 
   const Prev = locale === "ar" ? ArrowRight : ArrowLeft;
@@ -385,7 +406,7 @@ export function Wizard({ rules, limits }: { rules: InstitutionRules; limits: Lim
               {t.common.loading}
             </div>
           ) : reference ? (
-            <SuccessScreen reference={reference} />
+            <SuccessScreen reference={reference} onAnother={applyAnother} />
           ) : (
             <>
               {notice && (

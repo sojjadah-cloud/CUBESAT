@@ -52,7 +52,7 @@ export default async function ApplicationsPage({ searchParams }: { searchParams:
             <option value="">{a.allTeams}</option>
             {TEAMS.map((team) => (
               <option key={team.id} value={team.id}>
-                {team.name[locale]}
+                {teamName(team.id, locale)}
               </option>
             ))}
           </select>
