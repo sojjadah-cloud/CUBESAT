@@ -347,6 +347,7 @@ export const en = {
     signingIn: "Signing in…",
     invalidLogin: "This email isn't registered as an administrator.",
     missingLogin: "Enter your email.",
+    serverError: "The server couldn't complete sign-in (database not reachable). Please try again later.",
     signOut: "Sign out",
     overview: "Overview",
     applications: "Applications",

@@ -349,6 +349,7 @@ export const ar: Dictionary = {
     signingIn: "جارٍ تسجيل الدخول…",
     invalidLogin: "هذا البريد غير مسجّل كمسؤول.",
     missingLogin: "أدخل البريد الإلكتروني.",
+    serverError: "تعذّر على الخادم إكمال تسجيل الدخول (قاعدة البيانات غير متصلة). حاول لاحقًا.",
     signOut: "تسجيل الخروج",
     overview: "نظرة عامة",
     applications: "الطلبات",

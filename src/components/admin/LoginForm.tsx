@@ -13,7 +13,7 @@ export function LoginForm() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [busy, setBusy] = useState(false);
-  const [error, setError] = useState<"invalid" | "rate" | "network" | "missing" | null>(null);
+  const [error, setError] = useState<"invalid" | "rate" | "network" | "missing" | "server" | null>(null);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -35,7 +35,7 @@ export function LoginForm() {
         router.refresh();
         return;
       }
-      setError(res.status === 429 ? "rate" : "invalid");
+      setError(res.status === 429 ? "rate" : res.status >= 500 ? "server" : "invalid");
     } catch {
       setError("network");
     } finally {
@@ -43,7 +43,7 @@ export function LoginForm() {
     }
   };
 
-  const message = error === "missing" ? t.admin.missingLogin : error === "invalid" ? t.admin.invalidLogin : error === "rate" ? t.review.rateLimited : error ? t.errors.network : null;
+  const message = error === "server" ? t.admin.serverError : error === "missing" ? t.admin.missingLogin : error === "invalid" ? t.admin.invalidLogin : error === "rate" ? t.review.rateLimited : error ? t.errors.network : null;
 
   return (
     <main id="main" className="relative grid min-h-dvh place-items-center px-4 py-12">
