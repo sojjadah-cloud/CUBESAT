@@ -2,7 +2,7 @@ import { Pencil } from "lucide-react";
 import type { ApplicationData, ExperienceKey, StepId } from "@/lib/application";
 import { EXPERIENCE_KEYS } from "@/lib/application";
 import type { Dictionary, Locale } from "@/lib/i18n";
-import { ACADEMIC_LEVELS, WEEKLY_HOURS, departmentLabel, optionLabel } from "@/lib/institution";
+import { ACADEMIC_LEVELS, ENGLISH_LEVELS, WEEKLY_HOURS, departmentLabel, optionLabel } from "@/lib/institution";
 import { skillById, teamName } from "@/lib/teams";
 
 export interface SummaryFile {
@@ -146,6 +146,7 @@ export function ApplicationSummary({
               [t.student.department, departmentLabel(data.department, null, locale)],
               [t.student.specialisation, data.specialisation],
               [t.student.phone, <Ltr key="ph">{data.phone}</Ltr>],
+              [t.student.englishLevel, optionLabel(ENGLISH_LEVELS, data.englishLevel, locale) || none],
             ]}
           />
         </Section>

@@ -1,9 +1,9 @@
 "use client";
 
 import { useLocale } from "@/components/LocaleProvider";
-import { SelectField, StepHeading, TextField } from "@/components/ui/fields";
+import { ChoiceGroup, SelectField, StepHeading, TextField } from "@/components/ui/fields";
 import { useWizard } from "@/components/wizard/context";
-import { ACADEMIC_LEVELS, DEPARTMENTS } from "@/lib/institution";
+import { ACADEMIC_LEVELS, DEPARTMENTS, ENGLISH_LEVELS } from "@/lib/institution";
 import type { ApplicationData } from "@/lib/application";
 
 export function StudentStep() {
@@ -45,6 +45,17 @@ export function StudentStep() {
           options={DEPARTMENTS.map((o) => ({ value: o.id, label: o[locale] }))}
         />
         <TextField {...bind("specialisation")} label={s.specialisation} placeholder={s.ph.specialisation} maxLength={120} className="sm:col-span-2" />
+        <div className="sm:col-span-2">
+          <ChoiceGroup
+            name="englishLevel"
+            legend={s.englishLevel}
+            value={data.englishLevel}
+            onChange={(v) => update({ englishLevel: v })}
+            options={ENGLISH_LEVELS.map((o) => ({ value: o.id, label: o[locale] }))}
+            error={err("englishLevel")}
+            columns={4}
+          />
+        </div>
       </div>
     </div>
   );

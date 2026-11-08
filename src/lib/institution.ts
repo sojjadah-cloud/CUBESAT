@@ -11,6 +11,7 @@ export const OTHER = "other";
 export const ACADEMIC_LEVELS: Option[] = data.academicLevels;
 export const DEPARTMENTS: Option[] = data.departments;
 export const WEEKLY_HOURS: Option[] = data.weeklyHours;
+export const ENGLISH_LEVELS: Option[] = data.englishLevels;
 
 /**
  * Institutional validation rules. These come from environment variables so

@@ -26,6 +26,7 @@ export interface ApplicationRow {
   motivation_learn: string | null;
   weekly_hours: string;
   linkedin: string | null;
+  english_level: string | null;
   locale: string;
   created_at: Date;
   updated_at: Date;
@@ -142,6 +143,7 @@ export function rowToData(r: ApplicationRow): ApplicationData {
     motivationLearn: r.motivation_learn ?? "",
     weeklyHours: r.weekly_hours,
     linkedin: r.linkedin ?? "",
+    englishLevel: r.english_level ?? "",
     consent: true,
   };
 }

@@ -65,8 +65,8 @@ export async function POST(req: Request) {
            reference, submission_key, category, primary_team, secondary_team,
            full_name, student_id, student_id_norm, academic_level, department, department_other,
            specialisation, specialisation_other, phone, email, experience, skills, skills_other,
-           motivation_why, motivation_contribute, motivation_learn, weekly_hours, locale, linkedin, consent_at)
-         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16::jsonb,$17::jsonb,$18,$19,$20,$21,$22,$23,$24, now())
+           motivation_why, motivation_contribute, motivation_learn, weekly_hours, locale, linkedin, english_level, consent_at)
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16::jsonb,$17::jsonb,$18,$19,$20,$21,$22,$23,$24,$25, now())
          RETURNING id`,
         [
           ref, submissionKey, d.category, d.primaryTeam, null,
@@ -76,7 +76,7 @@ export async function POST(req: Request) {
           d.phone.trim(), null,
           JSON.stringify(d.experience), JSON.stringify(Array.from(new Set(d.skills))), d.skillsOther.trim() || null,
           d.motivationWhy.trim(), d.motivationContribute.trim(), d.motivationLearn.trim() || null,
-          d.weeklyHours, locale, d.linkedin.trim() || null,
+          d.weeklyHours, locale, d.linkedin.trim() || null, d.englishLevel,
         ],
       );
       if (draft) {

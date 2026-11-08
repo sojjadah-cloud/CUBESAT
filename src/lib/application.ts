@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { TEAMS, SKILL_IDS, type Category } from "@/lib/teams";
-import { ACADEMIC_LEVELS, DEPARTMENTS, WEEKLY_HOURS, type InstitutionRules } from "@/lib/institution";
+import { ACADEMIC_LEVELS, DEPARTMENTS, ENGLISH_LEVELS, WEEKLY_HOURS, type InstitutionRules } from "@/lib/institution";
 
 /* ────────────────────────── Data shape ────────────────────────── */
 
@@ -38,6 +38,7 @@ export interface ApplicationData {
   /** Typed by the student. */
   specialisation: string;
   phone: string;
+  englishLevel: string;
   experience: Experience;
   skills: string[];
   skillsOther: string;
@@ -59,6 +60,7 @@ export const emptyApplication = (): ApplicationData => ({
   department: "",
   specialisation: "",
   phone: "",
+  englishLevel: "",
   experience: {
     workshops: { has: null, entries: [] },
     courses: { has: null, entries: [] },
@@ -149,6 +151,7 @@ export function buildSchemas(rules: InstitutionRules) {
       department: z.string().refine((v) => DEPARTMENTS.some((d) => d.id === v), "choose"),
       specialisation: req(120),
       phone: req(30).refine(isValidPhone, "phone"),
+      englishLevel: z.string().refine((v) => ENGLISH_LEVELS.some((l) => l.id === v), "choose"),
     });
 
   const experience = z.object({

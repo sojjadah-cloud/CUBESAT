@@ -1,7 +1,7 @@
 import { requireAdminApi } from "@/lib/auth";
 import { audit } from "@/lib/audit";
 import { exportApplications, parseFilters } from "@/lib/admin-data";
-import { ACADEMIC_LEVELS, WEEKLY_HOURS, departmentLabel, optionLabel } from "@/lib/institution";
+import { ACADEMIC_LEVELS, ENGLISH_LEVELS, WEEKLY_HOURS, departmentLabel, optionLabel } from "@/lib/institution";
 import { EXPERIENCE_KEYS } from "@/lib/application";
 import { skillById, teamName } from "@/lib/teams";
 import { clientIp, json } from "@/lib/security";
@@ -26,7 +26,7 @@ export async function GET(req: Request) {
 
   const header = [
     "Reference", "Submitted", "Status", "Category", "Team",
-    "Full name", "Student ID", "Academic level", "Department", "Specialisation", "Mobile",
+    "Full name", "Student ID", "Academic level", "Department", "Specialisation", "Mobile", "English level",
     "Workshops", "Courses", "Competitions", "Projects", "Skills", "Other skills",
     "Why join", "Expected contribution", "Wants to learn", "Weekly hours", "LinkedIn", "Attachments", "Form language",
   ];
@@ -54,6 +54,7 @@ export async function GET(req: Request) {
       departmentLabel(r.department, r.department_other, L),
       r.specialisation_other ?? r.specialisation,
       r.phone,
+      optionLabel(ENGLISH_LEVELS, r.english_level, L),
       exp.workshops, exp.courses, exp.competitions, exp.projects,
       (r.skills ?? []).map((s) => skillById(s)?.label.en ?? s).join(", "),
       r.skills_other ?? "",

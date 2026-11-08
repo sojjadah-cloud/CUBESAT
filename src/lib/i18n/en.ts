@@ -154,6 +154,7 @@ export const en = {
     department: "Department",
     departmentOther: "Department name",
     specialisation: "Specialisation",
+    englishLevel: "Your English level",
     specialisationFirst: "Choose a department first",
     specialisationOther: "Specialisation name",
     phone: "Mobile number",

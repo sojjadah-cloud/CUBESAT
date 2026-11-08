@@ -156,6 +156,7 @@ export const ar: Dictionary = {
     department: "القسم الأكاديمي",
     departmentOther: "اسم القسم",
     specialisation: "التخصص",
+    englishLevel: "مستواك في اللغة الإنجليزية",
     specialisationFirst: "اختر القسم أولًا",
     specialisationOther: "اسم التخصص",
     phone: "رقم الهاتف",
