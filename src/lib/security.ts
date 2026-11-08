@@ -5,7 +5,12 @@ export const randomToken = (bytes = 32) => crypto.randomBytes(bytes).toString("b
 export const sha256 = (v: string) => crypto.createHash("sha256").update(v).digest("hex");
 
 export function clientIp(req: Request): string {
-  // Only trust forwarding headers when explicitly running behind a proxy.
+  // On Netlify (functions run on AWS Lambda) the edge sets this header itself,
+  // so clients can't override it. It isn't trusted anywhere else.
+  const onNetlify = process.env.NETLIFY === "true" || Boolean(process.env.AWS_LAMBDA_FUNCTION_NAME);
+  const netlify = onNetlify ? req.headers.get("x-nf-client-connection-ip") : null;
+  if (netlify) return netlify.trim();
+  // Otherwise only trust forwarding headers when explicitly running behind a proxy.
   if (process.env.TRUST_PROXY === "true") {
     const fwd = req.headers.get("x-forwarded-for");
     if (fwd) return fwd.split(",")[0].trim();

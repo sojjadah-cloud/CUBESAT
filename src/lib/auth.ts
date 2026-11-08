@@ -37,7 +37,9 @@ export async function findActiveAdmin(email: string): Promise<AdminUser | null> 
 }
 
 const adminEmailsFromEnv = () =>
-  (process.env.ADMIN_EMAILS ?? "")
+  [process.env.ADMIN_EMAILS, process.env.ADMIN_EMAIL]
+    .filter(Boolean)
+    .join(",")
     .split(",")
     .map((e) => e.trim().toLowerCase())
     .filter(Boolean);
