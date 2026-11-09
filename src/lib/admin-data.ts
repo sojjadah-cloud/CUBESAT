@@ -11,6 +11,7 @@ export interface ApplicationRow {
   secondary_team: string | null;
   full_name: string;
   student_id: string;
+  student_id_norm: string;
   academic_level: string;
   department: string;
   department_other: string | null;
@@ -80,8 +81,8 @@ export const PAGE_SIZE = 25;
 export async function listApplications(f: Filters, page: number) {
   const w = where(f);
   const total = (await queryOne<{ n: number }>(`SELECT count(*)::int AS n FROM applications ${w.sql}`, w.params))?.n ?? 0;
-  const rows = await query<Pick<ApplicationRow, "id" | "reference" | "status" | "category" | "primary_team" | "full_name" | "student_id" | "academic_level" | "created_at">>(
-    `SELECT id, reference, status, category, primary_team, full_name, student_id, academic_level, created_at
+  const rows = await query<Pick<ApplicationRow, "id" | "reference" | "status" | "category" | "primary_team" | "full_name" | "student_id" | "academic_level" | "department" | "department_other" | "phone" | "english_level" | "created_at">>(
+    `SELECT id, reference, status, category, primary_team, full_name, student_id, academic_level, department, department_other, phone, english_level, created_at
        FROM applications ${w.sql}
       ORDER BY created_at DESC
       LIMIT ${PAGE_SIZE} OFFSET ${(page - 1) * PAGE_SIZE}`,

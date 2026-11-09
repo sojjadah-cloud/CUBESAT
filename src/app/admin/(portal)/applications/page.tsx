@@ -3,7 +3,7 @@ import { Download, Search } from "lucide-react";
 import { requireAdminPage } from "@/lib/auth";
 import { listApplications, parseFilters } from "@/lib/admin-data";
 import { getServerDictionary } from "@/lib/server-locale";
-import { ACADEMIC_LEVELS, optionLabel } from "@/lib/institution";
+import { ACADEMIC_LEVELS, ENGLISH_LEVELS, departmentLabel, optionLabel } from "@/lib/institution";
 import { STATUSES } from "@/lib/application";
 import { TEAMS, teamName } from "@/lib/teams";
 import { StatusBadge } from "@/components/admin/StatusBadge";
@@ -92,15 +92,19 @@ export default async function ApplicationsPage({ searchParams }: { searchParams:
         <div className="panel mt-6 px-6 py-16 text-center text-ink-muted">{filtered ? a.empty : a.emptyAll}</div>
       ) : (
         <div className="panel mt-6 overflow-x-auto">
-          <table className="w-full min-w-[860px] text-start text-[14px]">
+          <table className="w-full min-w-[1080px] text-start text-[14px]">
             <thead>
               <tr className="border-b border-line text-[12px] text-ink-muted">
                 <th scope="col" className="px-4 py-3 text-start font-medium">{a.name}</th>
                 <th scope="col" className="px-4 py-3 text-start font-medium">{a.reference}</th>
                 <th scope="col" className="px-4 py-3 text-start font-medium">{a.team}</th>
                 <th scope="col" className="px-4 py-3 text-start font-medium">{t.student.academicLevel}</th>
+                <th scope="col" className="px-4 py-3 text-start font-medium">{t.student.department}</th>
+                <th scope="col" className="px-4 py-3 text-start font-medium">{t.student.englishLevel}</th>
+                <th scope="col" className="px-4 py-3 text-start font-medium">{t.student.phone}</th>
                 <th scope="col" className="px-4 py-3 text-start font-medium">{a.submitted}</th>
                 <th scope="col" className="px-4 py-3 text-start font-medium">{a.status}</th>
+                <th scope="col" className="px-4 py-3"><span className="sr-only">{a.viewReport}</span></th>
               </tr>
             </thead>
             <tbody className="divide-y divide-line/60">
@@ -115,9 +119,17 @@ export default async function ApplicationsPage({ searchParams }: { searchParams:
                   <td className="px-4 py-3 font-display text-[13px] text-ink-muted" dir="ltr">{r.reference}</td>
                   <td className="px-4 py-3">{teamName(r.primary_team, locale)}</td>
                   <td className="px-4 py-3 text-ink-muted">{optionLabel(ACADEMIC_LEVELS, r.academic_level, locale)}</td>
+                  <td className="px-4 py-3 text-ink-muted">{departmentLabel(r.department, r.department_other, locale)}</td>
+                  <td className="px-4 py-3 text-ink-muted">{r.english_level ? optionLabel(ENGLISH_LEVELS, r.english_level, locale) : "—"}</td>
+                  <td className="whitespace-nowrap px-4 py-3 text-ink-muted" dir="ltr">{r.phone}</td>
                   <td className="whitespace-nowrap px-4 py-3 text-ink-muted">{fmt.format(new Date(r.created_at))}</td>
                   <td className="px-4 py-3">
                     <StatusBadge status={r.status} label={t.status[r.status]} />
+                  </td>
+                  <td className="px-4 py-3">
+                    <Link href={`/admin/applications/${r.id}`} className="btn-secondary btn-sm whitespace-nowrap">
+                      {a.viewReport}
+                    </Link>
                   </td>
                 </tr>
               ))}
